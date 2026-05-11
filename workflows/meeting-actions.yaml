@@ -6,7 +6,7 @@ steps:
   - type: shell
     name: load-notes
     command: |
-      cat workflows/fixtures/meeting-notes-2026-w19.md
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/meeting-notes-2026-w19.md','utf8'))"
 
   - type: llm
     name: extract-actions
@@ -32,7 +32,7 @@ steps:
   - type: shell
     name: stamp-report
     command: |
-      printf '=== 주간 액션 아이템 (자동 추출) ===\n%s\n=== 끝 ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== 주간 액션 아이템 (자동 추출) ===\n' + {{prev}} + '\n=== 끝 ===\n')"
 
   - type: llm
     name: slack-format

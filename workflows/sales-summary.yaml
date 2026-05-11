@@ -6,7 +6,7 @@ steps:
   - type: shell
     name: load-csv
     command: |
-      cat workflows/fixtures/sales-2026-04.csv
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/sales-2026-04.csv','utf8'))"
 
   - type: llm
     name: analyze
@@ -29,7 +29,7 @@ steps:
   - type: shell
     name: wrap-as-report
     command: |
-      printf '=== 2026년 4월 매출 분석 (자동 생성) ===\n%s\n=== 보고서 끝 ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== 2026년 4월 매출 분석 (자동 생성) ===\n' + {{prev}} + '\n=== 보고서 끝 ===\n')"
 
   - type: llm
     name: exec-summary

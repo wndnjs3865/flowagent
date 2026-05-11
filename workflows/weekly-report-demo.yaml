@@ -14,7 +14,7 @@ steps:
   - type: shell
     name: wrap
     command: |
-      printf '=== Weekly Status ===\n%s\n=== End ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== Weekly Status ===\n' + {{prev}} + '\n=== End ===\n')"
 
   - type: llm
     name: polish

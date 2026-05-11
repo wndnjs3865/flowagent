@@ -25,11 +25,11 @@ stressRelieved: "{{귀사가_겪는_반복_업무_한_줄}}"
 #   {{전달_채널_영문}}             예: "Slack-ready Korean message"
 
 steps:
-  # 1단계 — 입력 데이터 로드 (shell). fixture 파일을 cat 으로 stdout에 넣음.
+  # 1단계 — 입력 데이터 로드 (shell). cross-platform: Node로 파일을 stdout에.
   - type: shell
     name: load-input
     command: |
-      cat workflows/fixtures/{{customer-slug}}-sample.{{확장자}}
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/{{customer-slug}}-sample.{{확장자}}','utf8'))"
 
   # 2단계 — LLM 핵심 추출. 영어 프롬프트 → 한국어 출력 규칙(feedback_demo_fixture_language).
   - type: llm
@@ -48,11 +48,11 @@ steps:
       {{prev}}
       ---
 
-  # 3단계 — 결과 wrap (shell). 보고용 헤더/푸터로 가독성 확보.
+  # 3단계 — 결과 wrap (shell). cross-platform: Node로 헤더/푸터 출력.
   - type: shell
     name: wrap-report
     command: |
-      printf '=== {{회사명}} {{워크플로우_제목}} ===\n%s\n=== 끝 ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== {{회사명}} {{워크플로우_제목}} ===\n' + {{prev}} + '\n=== 끝 ===\n')"
 
   # 4단계 — LLM 채널 포맷 정리. 영어 프롬프트 → 한국어 출력.
   - type: llm

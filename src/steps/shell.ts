@@ -5,13 +5,15 @@ import type { ShellStep } from "../spec";
 
 const execAsync = promisify(exec);
 
-// Previous step output is passed to the shell as an env var rather than
-// spliced into the command string. This neutralizes backticks, $(), $VAR,
-// and command chaining inside untrusted LLM output. Authors should wrap
-// {{prev}} in double quotes inside their YAML (e.g. "{{prev}}") to also
-// suppress word splitting and globbing.
+// Previous step output is passed via an environment variable, and `{{prev}}`
+// is substituted with the JS expression that reads it inside a Node one-liner
+// (`node -e "..."`). This makes commands cross-platform — PowerShell, cmd,
+// Git Bash, sh, and bash all execute the same `node -e ...` invocation
+// identically. It also neutralizes shell-injection vectors (backticks, $(),
+// $VAR, semicolon chains) because the value is read by Node at runtime, not
+// parsed by the surrounding shell.
 const PREV_ENV_VAR = "FLOWAGENT_PREV";
-const PREV_REFERENCE = `$${PREV_ENV_VAR}`;
+const PREV_REFERENCE = `process.env.${PREV_ENV_VAR}`;
 
 function applyContext(template: string): string {
   return template.replaceAll("{{prev}}", PREV_REFERENCE);

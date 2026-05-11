@@ -6,7 +6,7 @@ steps:
   - type: shell
     name: load-inbox
     command: |
-      cat workflows/fixtures/inbox-approvals-2026-05.md
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/inbox-approvals-2026-05.md','utf8'))"
 
   - type: llm
     name: triage
@@ -32,7 +32,7 @@ steps:
   - type: shell
     name: wrap-triage
     command: |
-      printf '=== 결재 자동 분류 (오늘 기준) ===\n%s\n=== 끝 ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== 결재 자동 분류 (오늘 기준) ===\n' + {{prev}} + '\n=== 끝 ===\n')"
 
   - type: llm
     name: daily-brief

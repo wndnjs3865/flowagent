@@ -6,7 +6,7 @@ steps:
   - type: shell
     name: load-inquiries
     command: |
-      cat workflows/fixtures/inquiries-2026-05.csv
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/inquiries-2026-05.csv','utf8'))"
 
   - type: llm
     name: classify
@@ -33,7 +33,7 @@ steps:
   - type: shell
     name: wrap-triage
     command: |
-      printf '=== 오늘의 문의 분류 (자동) ===\n%s\n=== 끝 ===\n' "{{prev}}"
+      node -e "process.stdout.write('=== 오늘의 문의 분류 (자동) ===\n' + {{prev}} + '\n=== 끝 ===\n')"
 
   - type: llm
     name: draft-replies
