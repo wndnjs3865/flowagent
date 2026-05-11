@@ -185,6 +185,40 @@ output (see [`feedback_demo_fixture_language`](./CLAUDE.md) rule for why).
 To adapt one for a real Pilot case, edit the file in `workflows/fixtures/` to the customer's own data —
 the YAML prompts stay the same. The customer's data never leaves their machine.
 
+### Pilot 미팅 자리 customize 시드 (`_pilot-draft-template.yaml`)
+
+5종 외 새로운 사례를 **미팅 자리에서 3분 안에** 만들기 위한 시드. 4단계(shell load → llm 추출 → shell wrap → llm 채널 포맷) 골격에 9개 `{{...}}` 자리표시자만 채우면 작동합니다.
+
+```bash
+# 1. 복사·rename (customer-slug는 영문 소문자·하이픈)
+cp workflows/_pilot-draft-template.yaml workflows/<customer-slug>-draft.yaml
+
+# 2. fixture 1건 추가 (회의록 .md / 매출 .csv / 문의 .json / 결재 .txt 중 하나)
+cp <고객이-가져온-파일> workflows/fixtures/<customer-slug>-sample.<확장자>
+
+# 3. 자리표시자 9개 모두 치환 — 미체크 시 카탈로그가 시드 파일 상단 주석에 있음
+grep -o "{{[^}]*}}" workflows/<customer-slug>-draft.yaml | sort -u
+
+# 4. 브라우저 listing(/) 새로고침 → 새 카드 자동 등장 → Run
+```
+
+**`_` prefix 파일은 listing/route에서 자동 제외** (`src/workflows-dir.ts`). 시드 자체는 listing에 안 보이고 `/workflows/_pilot-draft-template`·`/run` 모두 404. 데모 중 미완성 placeholder가 고객에게 노출될 위험 없음. 별도 비공개 시드를 더 두려면 동일하게 `_` prefix로 시작하는 파일명을 사용.
+
+자리표시자 카탈로그 (시드 파일 상단 주석 동일):
+
+| placeholder | 예시 | 어디에 |
+|---|---|---|
+| `{{담당자_페르소나}}` | "운영 / 사무관리" | 카드 페르소나 필터 |
+| `{{귀사가_겪는_반복_업무_한_줄}}` | "매주 동일한 양식 보고서 다시 쓰기" | 카드 stressRelieved |
+| `{{customer-slug}}` | "acme" | fixture 파일명·rename 일치 |
+| `{{확장자}}` | "md" / "csv" / "json" / "txt" | fixture 확장자 |
+| `{{입력_종류_영문}}` | "a Korean weekly meeting note" | 2단계 LLM prompt |
+| `{{추출_목표_영문}}` | "every action item with owner and deadline" | 2단계 LLM prompt |
+| `{{출력_형식_영문}}` | "Korean Markdown table" | 2단계 LLM prompt |
+| `{{회사명}}` | "Acme" | 3단계 결과 wrap 헤더 |
+| `{{워크플로우_제목}}` | "주간 액션 정리" | 3단계 결과 wrap 헤더 |
+| `{{전달_채널_영문}}` | "Slack-ready Korean message" | 4단계 LLM prompt |
+
 ## Writing a workflow
 
 Drop a `<name>.yaml` file in `workflows/`. The filename (without extension) becomes the URL slug; the

@@ -19,7 +19,9 @@ export function listWorkflows(dir: string): WorkflowEntry[] {
     return [];
   }
   return entries
-    .filter((file) => file.endsWith(".yaml"))
+    // `_*.yaml` are private seed/template files (e.g. `_pilot-draft-template.yaml`)
+    // intentionally excluded from listing AND routing so customers don't see unfinished placeholders.
+    .filter((file) => file.endsWith(".yaml") && !file.startsWith("_"))
     .map((file) => {
       const path = join(dir, file);
       const name = file.slice(0, -".yaml".length);
