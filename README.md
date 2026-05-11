@@ -30,6 +30,44 @@ Required env:
 | `FLOWAGENT_RUNS_DIR` | Directory where per-run JSONL audit logs are written (default `runs`). Created on demand. |
 | `FLOWAGENT_PILOT_CONTACT_EMAIL` | Email used by the Listing page "Pilot 미팅 신청" CTA button. The server builds a `mailto:` link with a fixed Korean subject. Defaults to `hello@flowagent.ai`. |
 
+## 1분 데모 영상
+
+> 5종 워크플로우 순회 데모. 노트북에서 5분 시작 → 실제 결과까지 한 화면.
+
+<!-- 영상 업로드 후 아래 PLACEHOLDER 두 줄을 교체:
+     1. video src — GitHub Release asset URL (`gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'`)
+     2. thumbnail fallback — assets/pilot-demo-thumb.png (선택) -->
+
+<video src="https://github.com/wndnjs3865/flowagent/releases/download/v0.1.0-demo/pilot-demo-1min.mp4" controls width="720" poster="assets/pilot-demo-thumb.png">
+  영상 재생이 안 보이면 <a href="https://github.com/wndnjs3865/flowagent/releases/tag/v0.1.0-demo">v0.1.0-demo Release</a>에서 직접 다운로드 (mp4, 약 10–20MB).
+</video>
+
+### 영상 제작 가이드
+
+영상은 직접 녹화·편집·업로드합니다. 절차는 다음 두 문서 따라가면 30분:
+
+1. **Storyboard** — [`docs/sales/pilot-demo-storyboard.md`](docs/sales/pilot-demo-storyboard.md) — 초 단위 컷·내레이션·녹화 도구·편집 가이드·fallback. 사전 점검 60초 + 1분 분할 8단계.
+2. **Asset 호스팅** — [`assets/README.md`](assets/README.md) — GitHub Release 업로드 절차, 파일명 규약(`pilot-demo-<용도>-<duration>.<ext>`), 1MB 이상 바이너리는 repo commit 금지.
+
+요약 흐름:
+
+```bash
+# 1. 사전 점검 (60초) — storyboard "사전 점검" 섹션 그대로
+rm -f runs/*.jsonl && pnpm dev > /dev/null 2>&1 &
+sleep 3 && curl -sf http://localhost:3000/ > /dev/null && echo OK
+
+# 2. OBS / QuickTime으로 1920×1080 30fps 녹화 (storyboard 따라 75초 → 60초 컷 편집)
+
+# 3. GitHub Release에 업로드
+gh release create v0.1.0-demo --title "Pilot demo assets v0.1" \
+  --notes "1분 데모 영상" ./pilot-demo-1min.mp4
+
+# 4. README 위 <video src="..."> 의 URL을 새 asset URL로 교체
+gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'
+```
+
+5종 워크플로우 실시간 실행 검증 결과 (이 README와 동시 발행): weekly-report-demo 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축.
+
 ## Demo path — first run in 5 minutes
 
 The fastest path from clone to a result you can show a Pilot stakeholder. Total: 5 minutes including
