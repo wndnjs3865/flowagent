@@ -14,12 +14,16 @@ export type WorkflowRoutesDeps = {
   runsDir: string;
   runners: StepRunners;
   // Sales-facing contact for the "Pilot 미팅 신청" CTA. Plain email — the
-  // server builds the mailto URL with a fixed Korean subject. Lives in env
-  // so the business address does not bake into source.
+  // server builds the mailto URL with a fixed Korean subject. Override via
+  // FLOWAGENT_PILOT_CONTACT_EMAIL only if you fork for your own sales channel;
+  // the default below is the FlowAgent official channel.
   pilotContactEmail?: string;
 };
 
-const DEFAULT_PILOT_CONTACT_EMAIL = "hello@flowagent.ai";
+// Official FlowAgent sales channel (사업자등록번호 607-20-94796). General users
+// who download the zip and run `pnpm dev` get a working mailto link without
+// any .env edit — the Pilot CTA banner just works out of the box.
+const DEFAULT_PILOT_CONTACT_EMAIL = "wndnjs3865@naver.com";
 const PILOT_MAIL_SUBJECT = "FlowAgent Pilot 미팅 신청";
 
 function buildPilotMailto(email: string): string {
