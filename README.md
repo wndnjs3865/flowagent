@@ -10,161 +10,71 @@ them verbatim in code, commits, and PR titles.
 
 ---
 
-## 일반 사용자용 5분 시작 가이드 (Windows 노트북)
+## 어디부터 읽어야 하나요?
 
-> 비개발자도 노트북에서 5분 안에 5종 워크플로우 데모를 직접 실행할 수 있게 만든 가이드입니다.
-> 본인 회사 데이터로 customize·4주 Pilot 진행은 마지막 "다음 단계"에서 미팅 신청으로 연결됩니다.
+이 README는 두 종류의 독자를 위해 분리돼 있습니다. 본인 경로만 따라가시면 됩니다.
 
-### 준비물
+| 누구 | 시작 위치 | 목표 |
+|---|---|---|
+| **일반 사용자 (비개발자, 사무·총무·영업지원)** — 노트북에서 5종 데모를 직접 돌려보고 싶음 | 바로 아래 [일반 사용자용 5분 시작 가이드](#general-user-guide) | 설치 → 5종 데모 실행. customize는 미팅 신청으로 |
+| **개발자 / Pilot 운영자** — 코드 수정, 새 워크플로우 작성, 미팅 시연·customize 진행 | [Developer quickstart](#developer-quickstart) → [Demo path (Pilot 운영자용)](#demo-path-operator) → [Writing a workflow](#writing-a-workflow) | 5종 외 사례를 yaml로, 4주 Pilot 진행, 코드 기여 |
 
-| 항목 | 비고 |
-|---|---|
-| Windows 10/11 노트북 | macOS·Linux도 거의 동일. 차이가 있는 부분만 본문에 명시 |
-| 인터넷 연결 | 다운로드 + LLM 호출에 필요 |
-| Anthropic API 키 1개 | 4단계에서 발급. 신규 가입 시 소액 무료 크레딧 자동 제공 (추측: 정책 변동 가능) |
-
-### 1단계 — Node.js 설치 (60초)
-
-1. <https://nodejs.org/> 접속 → 가운데 큰 "LTS" 버튼 클릭 → `node-vXX.X.X-x64.msi` 다운로드
-2. 받은 파일 더블클릭 → 모두 "Next" → 마지막 "Finish"
-3. 설치 확인 — **Windows 키 → "PowerShell" 검색 → "Windows PowerShell" 클릭 → 검은 창이 열리면** 아래 명령 입력 후 Enter:
-
-   ```powershell
-   node --version
-   ```
-
-   `v20.x.x` 이상이 나오면 성공. **만약 "command not found"가 나오면**: PowerShell 창을 닫고 새로 열기 (설치 후 PATH 갱신이 필요). 그래도 안 되면 노트북 재부팅 1회.
-
-### 2단계 — pnpm 설치 (15초)
-
-PowerShell 같은 창에서:
-
-```powershell
-npm i -g pnpm
-```
-
-`+ pnpm@X.X.X` 같은 줄이 마지막에 보이면 성공. 확인:
-
-```powershell
-pnpm --version
-```
-
-`X.X.X` 형태 숫자가 나오면 OK.
-
-**ExecutionPolicy 오류** (`pnpm.ps1을 로드할 수 없습니다`)가 보이면 — 단 한 번만 다음 줄 실행:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-```
-
-`Y` 입력하고 Enter. 이후 `pnpm --version` 다시.
-
-### 3단계 — 프로젝트 zip 다운로드 (30초)
-
-1. <https://github.com/wndnjs3865/flowagent> 접속
-2. 우측 위 **"Releases"** 클릭 → 최신 항목의 **"Assets"** 펼치기 → **"Source code (zip)"** 클릭해 저장 (Releases가 비어 보이면 대안: repo 메인 페이지 상단의 **초록색 "Code" 버튼 → "Download ZIP"**)
-3. 다운로드 폴더에서 zip 파일 우클릭 → **"압축 풀기" / "Extract All"** → 위치는 `C:\flowagent` 같이 한글·공백 없는 경로 권장
-4. PowerShell에서 그 폴더로 이동:
-
-   ```powershell
-   cd C:\flowagent
-   ```
-
-   (경로가 다르면 본인이 압축 푼 곳으로. PowerShell에 `cd ` 입력 후 폴더를 **마우스로 끌어다 놓으면** 경로 자동 입력됨)
-
-### 4단계 — Anthropic API 키 발급 + .env 파일 (90초)
-
-1. <https://console.anthropic.com/settings/keys> 접속 → 구글/이메일 가입 (1분)
-2. **"Create Key"** → 이름 아무거나(예: `flowagent-trial`) → 생성된 **`sk-ant-...` 로 시작하는 문자열을 복사** (이 화면을 닫으면 다시 못 봅니다)
-3. PowerShell에서 `.env` 파일 만들기:
-
-   ```powershell
-   Copy-Item .env.example .env
-   notepad .env
-   ```
-
-4. 메모장이 열리면 `ANTHROPIC_API_KEY=` 줄 끝에 방금 복사한 키를 붙여넣기:
-
-   ```
-   ANTHROPIC_API_KEY=sk-ant-api03-여기에붙여넣기...
-   ```
-
-5. **Ctrl+S로 저장 → 메모장 닫기**
-
-### 5단계 — 의존성 설치 + 서버 실행 (60초)
-
-PowerShell에서:
-
-```powershell
-pnpm install
-```
-
-여러 줄 진행 표시 후 `Done in XXs` 같이 끝나면 OK (1–2분 걸릴 수 있음).
-
-이어서:
-
-```powershell
-pnpm dev
-```
-
-화면에 다음 비슷한 줄이 보이면 서버가 떠 있는 상태입니다:
-
-```
-FlowAgent listening on http://localhost:3000
-```
-
-**이 PowerShell 창은 닫지 말고 그대로 두세요.** 닫으면 서버도 꺼집니다.
-
-### 6단계 — 브라우저에서 5종 데모 실행 (60초)
-
-1. Chrome·Edge·Firefox 어느 것이든 열고 주소창에 입력:
-
-   ```
-   http://localhost:3000
-   ```
-
-2. 5장의 카드가 보이는 페이지가 나타납니다:
-   - `weekly-report-demo` — 팀 리드 / 매니저
-   - `meeting-actions` — 운영 / PM
-   - `sales-summary` — 영업관리 / 대표 보고
-   - `inquiry-triage` — CS팀 / 운영
-   - `approval-triage` — 총무 / 사무관리
-
-3. **`meeting-actions` 카드 클릭** → 다음 페이지에서 **"Run" 버튼 클릭** → 회의록이 액션 표 → Slack 메시지로 변환되는 과정이 실시간 스트리밍됩니다 (약 10초).
-4. 다른 4개도 같은 방식으로 한 번씩 Run 해보세요 (각 10–28초).
-
-### 다음 단계 — 본인 회사 데이터로 customize·4주 Pilot
-
-여기까지 오면 5종 데모를 직접 보신 겁니다. 본인 회사 데이터(회의록 / 매출 CSV / 고객 문의 / 결재 요청 중 1건)로 customize하거나 4주 Pilot을 진행하시려면:
-
-- 미팅 신청: **wndnjs3865@naver.com** (제목 자유, 또는 listing 페이지 상단 "Pilot 미팅 신청" 배너 클릭)
-- 미팅에서 30분 안에 귀사 사례 1건을 같이 YAML 1개로 옮겨드립니다 — 회사 데이터는 노트북을 벗어나지 않습니다.
-- 1-pager: [`docs/sales/pilot-onepager.md`](docs/sales/pilot-onepager.md)
-
-### 자주 막히는 곳
-
-| 증상 | 해결 |
-|---|---|
-| PowerShell에서 `pnpm`, `node` 찾을 수 없음 | 창 닫고 새로 열기 (설치 후 PATH 갱신 필요). 안 되면 노트북 재부팅 1회 |
-| `pnpm install` 중 오래 멈춤 | 인터넷 연결 확인, 사내 방화벽이 npmjs.com 차단 시 모바일 핫스팟으로 시도 |
-| 브라우저에 "이 사이트에 연결할 수 없음" | PowerShell 창에 `FlowAgent listening on ...` 줄이 있는지 확인. 없으면 5단계 `pnpm dev` 재실행 |
-| Run 클릭 후 첫 단계에서 "API key" 오류 | `.env`의 `ANTHROPIC_API_KEY=` 뒤에 키 실제로 붙었는지 확인 (notepad으로 다시 열기). 키 앞뒤 공백·따옴표 없어야 함 |
-| 한국어가 깨져 보임 | 브라우저 새로고침(Ctrl+R 또는 Cmd+R). 그래도 깨지면 다른 브라우저로 |
-
-### 개발자용 대안
-
-git·터미널에 익숙하다면:
-
-```bash
-git clone https://github.com/wndnjs3865/flowagent && cd flowagent
-pnpm install
-cp .env.example .env  # then edit ANTHROPIC_API_KEY
-pnpm dev
-```
-
-위 6단계와 동일한 결과. 자세한 개발 환경·테스트·아키텍처는 아래 **"Developer quickstart"** 와 그 이후 섹션 참조.
+위 두 경로 모두에 공통으로 유용한 섹션: [1분 데모 영상](#demo-video-1min), [Bundled workflows](#bundled-workflows), [Run logs](#run-logs), [Limits](#limits).
 
 ---
+
+<a id="general-user-guide"></a>
+
+## 일반 사용자용 5분 시작 가이드 (Windows 노트북)
+
+**필요한 것**: Windows 노트북 · 인터넷 · Anthropic API 키
+
+**전체 흐름**  
+Part A (5분) → Part B (3분) → Part C (미팅 신청)
+
+### Part A — 설치 + 5종 데모 (5분)
+
+| # | 단계 | PowerShell 명령 | 성공 신호 |
+|---|------|------------------|----------|
+| 1 | Node.js 설치 | [nodejs.org](https://nodejs.org/) → LTS 다운로드·설치 | `node --version` → v20.x.x |
+| 2 | pnpm 설치 | `npm i -g pnpm` | `pnpm --version` → 숫자 |
+| 3 | 프로젝트 받기 | GitHub → **Code** → **Download ZIP** → 압축 풀기 → `cd C:\flowagent` | 폴더에 README.md 보임 |
+| 4 | API 키 넣기 | `Copy-Item .env.example .env` → `notepad .env` → 키 붙여넣기 | `ANTHROPIC_API_KEY=sk-ant-…` |
+| 5 | 실행 | `pnpm install` → `pnpm dev` | `FlowAgent listening on http://localhost:3000` |
+| 6 | 데모 실행 | 브라우저 `http://localhost:3000` → 카드 클릭 → **Run** | 한국어 결과 실시간 출력 |
+
+**PowerShell 창은 절대 닫지 마세요** — 서버가 꺼집니다.
+
+### Part B — 내 데이터 1개 바로 넣어보기 (3분)
+
+아래 4개 워크플로우는 **파일 하나만 덮어쓰면** 됩니다.
+
+| 워크플로우 | 바꿀 파일 | 형식 |
+|------------|-----------|------|
+| meeting-actions | meeting-notes-2026-w19.md | 한국어 회의록 (.md) |
+| sales-summary | sales-2026-04.csv | CSV (엑셀 저장 시 UTF-8) |
+| inquiry-triage | inquiries-2026-05.csv | 고객 문의 CSV |
+| approval-triage | inbox-approvals-2026-05.md | 결재 요청 (.md) |
+
+**3단계**
+1. 위 파일을 Explorer에서 열기 (더블클릭)
+2. 본인 데이터로 내용 바꾸고 저장
+3. 브라우저 새로고침 → 같은 카드 → **Run**
+
+### Part C — 더 깊게 customize하고 싶다면
+
+미팅 신청 → **wndnjs3865@naver.com** (또는 페이지 상단 **Pilot 미팅 신청** 배너 클릭)  
+30분 안에 귀사 데이터로 YAML 하나 만들어 드립니다.
+
+**막힐 때 한 줄 해결**
+- pnpm.ps1 오류 → `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
+- node/pnpm 안 보임 → PowerShell 창 닫고 새로 열기
+- 브라우저 연결 안 됨 → PowerShell에 "listening on" 문구 확인 후 `pnpm dev` 다시
+- API key 오류 → .env 파일 다시 열어서 키 정확히 붙여넣기
+
+---
+
+<a id="developer-quickstart"></a>
 
 ## Developer quickstart
 
@@ -186,7 +96,9 @@ Required env:
 | `PORT` | HTTP port (default `3000`). |
 | `FLOWAGENT_WORKFLOWS_DIR` | Directory scanned for `*.yaml` workflows (default `workflows`). |
 | `FLOWAGENT_RUNS_DIR` | Directory where per-run JSONL audit logs are written (default `runs`). Created on demand. |
-| `FLOWAGENT_PILOT_CONTACT_EMAIL` | Email used by the Listing page "Pilot 미팅 신청" CTA button. The server builds a `mailto:` link with a fixed Korean subject. Defaults to `hello@flowagent.ai`. |
+| `FLOWAGENT_PILOT_CONTACT_EMAIL` | Email used by the Listing page "Pilot 미팅 신청" CTA button. The server builds a `mailto:` link with a fixed Korean subject. Defaults to the FlowAgent official sales channel `wndnjs3865@naver.com` — override only if you fork for your own sales. |
+
+<a id="demo-video-1min"></a>
 
 ## 1분 데모 영상
 
@@ -226,7 +138,9 @@ gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'
 
 5종 워크플로우 실시간 실행 검증 결과 (이 README와 동시 발행): weekly-report-demo 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축.
 
-## Demo path — first run in 5 minutes
+<a id="demo-path-operator"></a>
+
+## Demo path (Pilot 운영자용) — first run in 5 minutes
 
 The fastest path from clone to a result you can show a Pilot stakeholder. Total: 5 minutes including
 prereqs, 3 minutes if Node/pnpm are already installed.
@@ -348,6 +262,8 @@ ls runs/*.jsonl 2>/dev/null | wc -l   # 0이면 OK, 아니면 mv runs runs.bak &
 4. 다음 미팅 후보 일정 3개 (1주차 설치 미팅용)
 5. 다음 outreach·설치 미팅 제안 이메일 — 템플릿 `docs/sales/pilot-outreach-email.md` 사용. `{{회사명}}/{{담당자명}}/{{후보1·2·3}}/{{발신자명}}` 자리표시자만 치환하고 PDF 첨부 후 발송. Follow-up·Warm intro·설치 미팅 3가지 변형이 같은 파일 하단에 있음.
 
+<a id="bundled-workflows"></a>
+
 ## Bundled workflows
 
 The `workflows/` directory ships five end-to-end demos covering the most common Korean SMB office
@@ -398,6 +314,8 @@ grep -o "{{[^}]*}}" workflows/<customer-slug>-draft.yaml | sort -u
 | `{{회사명}}` | "Acme" | 3단계 결과 wrap 헤더 |
 | `{{워크플로우_제목}}` | "주간 액션 정리" | 3단계 결과 wrap 헤더 |
 | `{{전달_채널_영문}}` | "Slack-ready Korean message" | 4단계 LLM prompt |
+
+<a id="writing-a-workflow"></a>
 
 ## Writing a workflow
 
@@ -476,6 +394,8 @@ docs/adr/              # architecture decisions
 .claude/               # project skills, agents, commands (Claude Code config)
 ```
 
+<a id="run-logs"></a>
+
 ## Run logs
 
 Every workflow run streams its events live to `runs/<runId>.jsonl` as well as over SSE. One JSON object
@@ -530,6 +450,8 @@ See [`CLAUDE.md`](./CLAUDE.md) for the full agent-facing config. The short versi
 2. **Spec → Build → Review** — one skill per lifecycle phase, see `.claude/skills/`.
 3. **Maintainability first** — code should be readable by a developer who lands on this repo cold. Prefer
    editing existing files; surface assumptions; sanitize at every trust boundary.
+
+<a id="limits"></a>
 
 ## Limits (intentional, MVP scope)
 
