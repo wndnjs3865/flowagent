@@ -8,7 +8,165 @@ browser, watch results stream over SSE. Single-user, single-machine, no DAG, no 
 Domain terms (`Workflow`, `Step`, `Run`, `Runner`, `Agent`) are defined in [`CONTEXT.md`](./CONTEXT.md). Use
 them verbatim in code, commits, and PR titles.
 
-## Quickstart
+---
+
+## 일반 사용자용 5분 시작 가이드 (Windows 노트북)
+
+> 비개발자도 노트북에서 5분 안에 5종 워크플로우 데모를 직접 실행할 수 있게 만든 가이드입니다.
+> 본인 회사 데이터로 customize·4주 Pilot 진행은 마지막 "다음 단계"에서 미팅 신청으로 연결됩니다.
+
+### 준비물
+
+| 항목 | 비고 |
+|---|---|
+| Windows 10/11 노트북 | macOS·Linux도 거의 동일. 차이가 있는 부분만 본문에 명시 |
+| 인터넷 연결 | 다운로드 + LLM 호출에 필요 |
+| Anthropic API 키 1개 | 4단계에서 발급. 신규 가입 시 소액 무료 크레딧 자동 제공 (추측: 정책 변동 가능) |
+
+### 1단계 — Node.js 설치 (60초)
+
+1. <https://nodejs.org/> 접속 → 가운데 큰 "LTS" 버튼 클릭 → `node-vXX.X.X-x64.msi` 다운로드
+2. 받은 파일 더블클릭 → 모두 "Next" → 마지막 "Finish"
+3. 설치 확인 — **Windows 키 → "PowerShell" 검색 → "Windows PowerShell" 클릭 → 검은 창이 열리면** 아래 명령 입력 후 Enter:
+
+   ```powershell
+   node --version
+   ```
+
+   `v20.x.x` 이상이 나오면 성공. **만약 "command not found"가 나오면**: PowerShell 창을 닫고 새로 열기 (설치 후 PATH 갱신이 필요). 그래도 안 되면 노트북 재부팅 1회.
+
+### 2단계 — pnpm 설치 (15초)
+
+PowerShell 같은 창에서:
+
+```powershell
+npm i -g pnpm
+```
+
+`+ pnpm@X.X.X` 같은 줄이 마지막에 보이면 성공. 확인:
+
+```powershell
+pnpm --version
+```
+
+`X.X.X` 형태 숫자가 나오면 OK.
+
+**ExecutionPolicy 오류** (`pnpm.ps1을 로드할 수 없습니다`)가 보이면 — 단 한 번만 다음 줄 실행:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+`Y` 입력하고 Enter. 이후 `pnpm --version` 다시.
+
+### 3단계 — 프로젝트 zip 다운로드 (30초)
+
+1. <https://github.com/wndnjs3865/flowagent> 접속
+2. 우측 위 **"Releases"** 클릭 → 최신 항목의 **"Assets"** 펼치기 → **"Source code (zip)"** 클릭해 저장 (Releases가 비어 보이면 대안: repo 메인 페이지 상단의 **초록색 "Code" 버튼 → "Download ZIP"**)
+3. 다운로드 폴더에서 zip 파일 우클릭 → **"압축 풀기" / "Extract All"** → 위치는 `C:\flowagent` 같이 한글·공백 없는 경로 권장
+4. PowerShell에서 그 폴더로 이동:
+
+   ```powershell
+   cd C:\flowagent
+   ```
+
+   (경로가 다르면 본인이 압축 푼 곳으로. PowerShell에 `cd ` 입력 후 폴더를 **마우스로 끌어다 놓으면** 경로 자동 입력됨)
+
+### 4단계 — Anthropic API 키 발급 + .env 파일 (90초)
+
+1. <https://console.anthropic.com/settings/keys> 접속 → 구글/이메일 가입 (1분)
+2. **"Create Key"** → 이름 아무거나(예: `flowagent-trial`) → 생성된 **`sk-ant-...` 로 시작하는 문자열을 복사** (이 화면을 닫으면 다시 못 봅니다)
+3. PowerShell에서 `.env` 파일 만들기:
+
+   ```powershell
+   Copy-Item .env.example .env
+   notepad .env
+   ```
+
+4. 메모장이 열리면 `ANTHROPIC_API_KEY=` 줄 끝에 방금 복사한 키를 붙여넣기:
+
+   ```
+   ANTHROPIC_API_KEY=sk-ant-api03-여기에붙여넣기...
+   ```
+
+5. **Ctrl+S로 저장 → 메모장 닫기**
+
+### 5단계 — 의존성 설치 + 서버 실행 (60초)
+
+PowerShell에서:
+
+```powershell
+pnpm install
+```
+
+여러 줄 진행 표시 후 `Done in XXs` 같이 끝나면 OK (1–2분 걸릴 수 있음).
+
+이어서:
+
+```powershell
+pnpm dev
+```
+
+화면에 다음 비슷한 줄이 보이면 서버가 떠 있는 상태입니다:
+
+```
+FlowAgent listening on http://localhost:3000
+```
+
+**이 PowerShell 창은 닫지 말고 그대로 두세요.** 닫으면 서버도 꺼집니다.
+
+### 6단계 — 브라우저에서 5종 데모 실행 (60초)
+
+1. Chrome·Edge·Firefox 어느 것이든 열고 주소창에 입력:
+
+   ```
+   http://localhost:3000
+   ```
+
+2. 5장의 카드가 보이는 페이지가 나타납니다:
+   - `weekly-report-demo` — 팀 리드 / 매니저
+   - `meeting-actions` — 운영 / PM
+   - `sales-summary` — 영업관리 / 대표 보고
+   - `inquiry-triage` — CS팀 / 운영
+   - `approval-triage` — 총무 / 사무관리
+
+3. **`meeting-actions` 카드 클릭** → 다음 페이지에서 **"Run" 버튼 클릭** → 회의록이 액션 표 → Slack 메시지로 변환되는 과정이 실시간 스트리밍됩니다 (약 10초).
+4. 다른 4개도 같은 방식으로 한 번씩 Run 해보세요 (각 10–28초).
+
+### 다음 단계 — 본인 회사 데이터로 customize·4주 Pilot
+
+여기까지 오면 5종 데모를 직접 보신 겁니다. 본인 회사 데이터(회의록 / 매출 CSV / 고객 문의 / 결재 요청 중 1건)로 customize하거나 4주 Pilot을 진행하시려면:
+
+- 미팅 신청: **wndnjs3865@naver.com** (제목 자유, 또는 listing 페이지 상단 "Pilot 미팅 신청" 배너 클릭)
+- 미팅에서 30분 안에 귀사 사례 1건을 같이 YAML 1개로 옮겨드립니다 — 회사 데이터는 노트북을 벗어나지 않습니다.
+- 1-pager: [`docs/sales/pilot-onepager.md`](docs/sales/pilot-onepager.md)
+
+### 자주 막히는 곳
+
+| 증상 | 해결 |
+|---|---|
+| PowerShell에서 `pnpm`, `node` 찾을 수 없음 | 창 닫고 새로 열기 (설치 후 PATH 갱신 필요). 안 되면 노트북 재부팅 1회 |
+| `pnpm install` 중 오래 멈춤 | 인터넷 연결 확인, 사내 방화벽이 npmjs.com 차단 시 모바일 핫스팟으로 시도 |
+| 브라우저에 "이 사이트에 연결할 수 없음" | PowerShell 창에 `FlowAgent listening on ...` 줄이 있는지 확인. 없으면 5단계 `pnpm dev` 재실행 |
+| Run 클릭 후 첫 단계에서 "API key" 오류 | `.env`의 `ANTHROPIC_API_KEY=` 뒤에 키 실제로 붙었는지 확인 (notepad으로 다시 열기). 키 앞뒤 공백·따옴표 없어야 함 |
+| 한국어가 깨져 보임 | 브라우저 새로고침(Ctrl+R 또는 Cmd+R). 그래도 깨지면 다른 브라우저로 |
+
+### 개발자용 대안
+
+git·터미널에 익숙하다면:
+
+```bash
+git clone https://github.com/wndnjs3865/flowagent && cd flowagent
+pnpm install
+cp .env.example .env  # then edit ANTHROPIC_API_KEY
+pnpm dev
+```
+
+위 6단계와 동일한 결과. 자세한 개발 환경·테스트·아키텍처는 아래 **"Developer quickstart"** 와 그 이후 섹션 참조.
+
+---
+
+## Developer quickstart
 
 ```bash
 pnpm install
@@ -78,6 +236,28 @@ prereqs, 3 minutes if Node/pnpm are already installed.
 - Node.js 20.6 or newer (`node --version`) — needed for `tsx --env-file`.
 - pnpm (`npm i -g pnpm` if missing).
 - Anthropic API key from <https://console.anthropic.com/settings/keys>.
+
+### Windows 사용자 안내 (PowerShell · cmd · Git Bash 모두 동일 동작)
+
+이 프로젝트의 shell step은 OS-중립 `node -e "..."` 한 줄로 통일돼 있어 **추가로 Git Bash·WSL 설치가 필요 없습니다.** Windows 표준 PowerShell·cmd 어느 쪽에서도 5종 워크플로우가 그대로 동작합니다.
+
+| 단계 | 명령 (PowerShell 또는 cmd) |
+|---|---|
+| 1. Node.js 설치 | <https://nodejs.org/> "LTS" installer 또는 `winget install OpenJS.NodeJS.LTS` |
+| 2. pnpm 설치 | `npm i -g pnpm` |
+| 3. 프로젝트 받기 | `git clone https://github.com/wndnjs3865/flowagent && cd flowagent` |
+| 4. 의존성 설치 | `pnpm install` |
+| 5. `.env` 생성 | `copy .env.example .env` (cmd) 또는 `Copy-Item .env.example .env` (PowerShell) — 그 후 `.env` 열어 `ANTHROPIC_API_KEY=sk-ant-...` 붙여넣기 |
+| 6. 서버 실행 | `pnpm dev` |
+| 7. 브라우저 | <http://localhost:3000> |
+
+**PowerShell 실행정책 이슈 시** — `pnpm.ps1`이 차단되면 한 번만:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+이후 `pnpm dev` 정상. cmd에서는 이 문제 없음.
 
 ### Steps (3 minutes)
 
@@ -236,7 +416,7 @@ steps:
   - type: shell
     name: wrap
     command: |
-      printf '=== Output ===\n%s\n' "{{prev}}"
+      node -e "process.stdout.write('=== Output ===\n' + {{prev}} + '\n')"
   - type: llm
     prompt: |
       Translate to Korean:
@@ -248,15 +428,27 @@ steps:
 `{{prev}}` is replaced with the previous Step's output. Different rules per step type:
 
 - **`llm` step** — `{{prev}}` is spliced into the prompt string verbatim. No escaping needed.
-- **`shell` step** — `{{prev}}` is replaced with the env reference `$FLOWAGENT_PREV`, and the previous
-  output is passed via the child process's environment instead of being spliced into the command. This
-  neutralizes backticks, `$()`, `$VAR`, and command chaining inside untrusted LLM output. **Always wrap
-  `{{prev}}` in double quotes** (`"{{prev}}"`) to also suppress word splitting and globbing:
+- **`shell` step** — `{{prev}}` is replaced with the JS expression `process.env.FLOWAGENT_PREV`, and the previous output is passed via the child process's environment. **The shell command must be a `node -e "..."` one-liner** — this makes commands cross-platform (PowerShell, cmd, Git Bash, sh, bash all execute identically) and neutralizes backticks, `$()`, `$VAR`, and semicolon chains inside untrusted LLM output because Node reads the value at runtime instead of the shell tokenizing it.
 
   ```yaml
-  command: printf '%s' "{{prev}}"   # safe
-  command: echo {{prev}}            # works, but unquoted — avoid for multi-line prev
+  # ✅ Recommended — Node one-liner reads prev as a JS expression
+  command: |
+    node -e "process.stdout.write({{prev}})"
+
+  # ✅ Wrap with a banner
+  command: |
+    node -e "process.stdout.write('=== Header ===\n' + {{prev}} + '\n=== End ===\n')"
+
+  # ✅ Load a fixture file (replaces `cat <path>` from sh-only workflows)
+  command: |
+    node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/data.csv','utf8'))"
+
+  # ❌ Avoid — sh-specific, fails on Windows PowerShell/cmd
+  command: printf '%s' "{{prev}}"
+  command: cat workflows/fixtures/data.csv
   ```
+
+  Place `{{prev}}` unquoted as a bare token inside the Node expression — it expands to a JS variable, not a string literal.
 
 ## Project layout
 
