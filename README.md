@@ -25,52 +25,58 @@ them verbatim in code, commits, and PR titles.
 
 <a id="general-user-guide"></a>
 
-## 일반 사용자용 5분 시작 가이드 (Windows 노트북)
+## 일반 사용자 — 더블클릭 2번이면 끝
 
-**필요한 것**: Windows 노트북 · 인터넷 · Anthropic API 키
+> 비개발자도 GitHub·PowerShell·터미널을 모르고 노트북에서 5종 데모를 직접 실행할 수 있게 만든 흐름.
 
-**전체 흐름**  
-Part A (5분) → Part B (3분) → Part C (미팅 신청)
+### 1️⃣ [📦 flowagent ZIP 다운로드](https://github.com/wndnjs3865/flowagent/archive/refs/heads/main.zip)
 
-### Part A — 설치 + 5종 데모 (5분)
+위 큰 링크를 클릭하면 `flowagent-main.zip` 이 자동으로 받아집니다.
+다운로드 폴더로 가서 zip 파일을 **우클릭 → "모든 파일 압축 풀기"** → 위치는 `C:\flowagent` 같이 한글·공백 없는 폴더 권장.
 
-| # | 단계 | PowerShell 명령 | 성공 신호 |
-|---|------|------------------|----------|
-| 1 | Node.js 설치 | [nodejs.org](https://nodejs.org/) → LTS 다운로드·설치 | `node --version` → v20.x.x |
-| 2 | pnpm 설치 | `npm i -g pnpm` | `pnpm --version` → 숫자 |
-| 3 | 프로젝트 받기 | GitHub → **Code** → **Download ZIP** → 압축 풀기 → `cd C:\flowagent` | 폴더에 README.md 보임 |
-| 4 | API 키 넣기 | `Copy-Item .env.example .env` → `notepad .env` → 키 붙여넣기 | `ANTHROPIC_API_KEY=sk-ant-…` |
-| 5 | 실행 | `pnpm install` → `pnpm dev` | `FlowAgent listening on http://localhost:3000` |
-| 6 | 데모 실행 | 브라우저 `http://localhost:3000` → 카드 클릭 → **Run** | 한국어 결과 실시간 출력 |
+### 2️⃣ 압축 푼 폴더 안의 **`start.bat`** 더블클릭
 
-**PowerShell 창은 절대 닫지 마세요** — 서버가 꺼집니다.
+다음 4단계가 자동으로 진행됩니다. **표 오른쪽 "본인이 할 일"만 해주시면 됩니다.**
 
-### Part B — 내 데이터 1개 바로 넣어보기 (3분)
+| 자동 진행 | 본인이 할 일 |
+|---|---|
+| Node.js 설치 여부 확인 | 없으면 [nodejs.org](https://nodejs.org/)가 자동으로 열림 → **LTS** 초록 버튼으로 설치한 뒤 `start.bat` 다시 더블클릭 |
+| pnpm 자동 설치 (corepack 또는 npm) | (없음) |
+| 메모장 자동 실행 → `.env` 파일 열림 | **`ANTHROPIC_API_KEY=` 뒤에 본인 키 붙여넣고 `Ctrl+S` → 메모장 닫기** ([키 발급 1분](https://console.anthropic.com/settings/keys) — Create Key → `sk-ant-…` 복사) |
+| 의존성 설치 + 서버 시작 + 브라우저 자동 열기 | 브라우저에 5장 카드 보이면 카드 1개 → **Run** |
 
-아래 4개 워크플로우는 **파일 하나만 덮어쓰면** 됩니다.
+**검은 창은 닫지 마세요** — 서버가 꺼집니다.
+*(SmartScreen이 `start.bat` 실행 경고를 띄우면 **추가 정보 → 실행**.)*
+
+---
+
+### 내 데이터 1개 넣어보기 (선택, 3분)
+
+5종 중 4개는 노트북 안 파일을 LLM 입력으로 씁니다. **그 파일을 본인 데이터로 같은 이름·같은 형식으로 덮어쓰면** 본인 데이터 결과가 즉시 나옵니다.
 
 | 워크플로우 | 바꿀 파일 | 형식 |
-|------------|-----------|------|
-| meeting-actions | meeting-notes-2026-w19.md | 한국어 회의록 (.md) |
-| sales-summary | sales-2026-04.csv | CSV (엑셀 저장 시 UTF-8) |
-| inquiry-triage | inquiries-2026-05.csv | 고객 문의 CSV |
-| approval-triage | inbox-approvals-2026-05.md | 결재 요청 (.md) |
+|---|---|---|
+| `meeting-actions` | `workflows\fixtures\meeting-notes-2026-w19.md` | 한국어 회의록 (.md) |
+| `sales-summary` | `workflows\fixtures\sales-2026-04.csv` | CSV (Excel 저장 시 **"CSV UTF-8"**) |
+| `inquiry-triage` | `workflows\fixtures\inquiries-2026-05.csv` | CSV — `id,접수일시,고객명,문의내용` |
+| `approval-triage` | `workflows\fixtures\inbox-approvals-2026-05.md` | 결재 요청 (.md, `## REQ-001` 형식) |
 
-**3단계**
-1. 위 파일을 Explorer에서 열기 (더블클릭)
+1. 위 표에서 1개 선택 → Explorer에서 해당 파일 **더블클릭**해 열기
 2. 본인 데이터로 내용 바꾸고 저장
 3. 브라우저 새로고침 → 같은 카드 → **Run**
 
-### Part C — 더 깊게 customize하고 싶다면
+### 더 깊은 customize · 4주 Pilot
 
-미팅 신청 → **wndnjs3865@naver.com** (또는 페이지 상단 **Pilot 미팅 신청** 배너 클릭)  
-30분 안에 귀사 데이터로 YAML 하나 만들어 드립니다.
+미팅 신청 → **wndnjs3865@naver.com** (또는 페이지 상단 **Pilot 미팅 신청** 배너).
+30분 안에 귀사 데이터로 YAML 하나 함께 만들어 드립니다 — 회사 데이터는 노트북을 벗어나지 않습니다.
 
-**막힐 때 한 줄 해결**
-- pnpm.ps1 오류 → `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
-- node/pnpm 안 보임 → PowerShell 창 닫고 새로 열기
-- 브라우저 연결 안 됨 → PowerShell에 "listening on" 문구 확인 후 `pnpm dev` 다시
-- API key 오류 → .env 파일 다시 열어서 키 정확히 붙여넣기
+### 막힐 때
+
+- **"Node.js가 설치되지 않았습니다"** → nodejs.org가 자동으로 열림. LTS 설치 후 `start.bat` 다시 더블클릭.
+- **검은 창에 "API 키" 오류** → 폴더의 `.env` 파일을 메모장으로 다시 열어 `ANTHROPIC_API_KEY=` 뒤 키 (앞뒤 공백·따옴표 없이) 확인 후 저장 → `start.bat` 다시.
+- **브라우저 "사이트 연결 불가"** → 검은 창에 `FlowAgent listening on …` 줄 있는지 확인. 없으면 `start.bat` 다시 더블클릭.
+- **검은 창 닫혀버림** → 서버가 꺼졌습니다. `start.bat` 다시 더블클릭.
+- **한국어 깨짐** → 브라우저 `Ctrl+R` 새로고침.
 
 ---
 
