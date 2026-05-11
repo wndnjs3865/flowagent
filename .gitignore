@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+runs/*.jsonl
+*.log
+.DS_Store
+
+# Claude Code per-machine permission state (user-specific)
+.claude/settings.local.json
+
+# Local snapshot backups (not source of truth)
+backup_full_20260511/
+backup_*/

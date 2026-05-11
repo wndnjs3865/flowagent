@@ -1,0 +1,50 @@
+name: sales-summary
+description: 월간 매출 CSV를 한국어 경영진 1-pager 리포트로 변환합니다.
+persona: 영업관리 / 대표 보고
+stressRelieved: 월말마다 이상치 찾고 1-pager 만드는 압박
+steps:
+  - type: shell
+    name: load-csv
+    command: |
+      cat workflows/fixtures/sales-2026-04.csv
+
+  - type: llm
+    name: analyze
+    prompt: |
+      You are analyzing a small monthly sales CSV with Korean column headers.
+      Columns: 주차, 채널, 제품, 매출_원, 전월비.
+
+      Produce a structured analysis with these sections (each 1–3 short lines):
+      1. 총 매출 — 합계 금액 + 전체 톤(증가/감소/혼조).
+      2. 채널별 비중 — 상위 3개 채널과 각 비중(%).
+      3. 이상치 — 전월비 -25% 이하 또는 +30% 이상인 row 1~2개. 가능한 원인 가설 1줄씩.
+      4. 한 줄 결론 — 다음 달 액션 1개를 명령형으로 제안.
+
+      Output in Korean only, no preamble, no closing remark.
+
+      ---
+      {{prev}}
+      ---
+
+  - type: shell
+    name: wrap-as-report
+    command: |
+      printf '=== 2026년 4월 매출 분석 (자동 생성) ===\n%s\n=== 보고서 끝 ===\n' "{{prev}}"
+
+  - type: llm
+    name: exec-summary
+    prompt: |
+      Convert the analysis below into a 3-sentence executive summary for the
+      Korean CEO of a 10–200-person SMB.
+
+      Style:
+      - Direct, no hedging.
+      - Sentence 1: 전월 대비 가장 큰 변화 한 가지.
+      - Sentence 2: 그 변화의 가장 가능성 높은 원인 1개.
+      - Sentence 3: 5월에 즉시 시도할 액션 1개.
+
+      Output in Korean only, exactly 3 sentences, no preamble.
+
+      ---
+      {{prev}}
+      ---

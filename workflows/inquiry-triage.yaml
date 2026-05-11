@@ -1,0 +1,61 @@
+name: inquiry-triage
+description: 오늘 접수된 한국어 고객 문의를 카테고리·긴급도로 분류하고 카테고리별 답변 초안까지 만듭니다.
+persona: CS팀 / 운영
+stressRelieved: 매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로
+steps:
+  - type: shell
+    name: load-inquiries
+    command: |
+      cat workflows/fixtures/inquiries-2026-05.csv
+
+  - type: llm
+    name: classify
+    prompt: |
+      You are reviewing today's customer inquiries from a Korean SMB CS desk.
+
+      For each row, identify:
+      - 카테고리 — pick exactly one: 배송지연 / 제품파손 / 제품문의 / 환불요청 / 감사·관심 / 결제오류 / 기타
+      - 긴급도 — 높음 / 보통 / 낮음
+        (Guideline: 환불요청·제품파손·결제오류 → 높음, 배송지연 → 보통, 제품문의·감사·관심 → 낮음)
+      - 한줄요약 — concise Korean summary of the complaint
+
+      Output a single Korean Markdown table with header:
+      | id | 고객 | 카테고리 | 긴급도 | 한줄요약 |
+
+      Sort rows by 긴급도 (높음 → 보통 → 낮음).
+      Output the table only — no preamble, no closing remark.
+      Output in Korean only.
+
+      ---
+      {{prev}}
+      ---
+
+  - type: shell
+    name: wrap-triage
+    command: |
+      printf '=== 오늘의 문의 분류 (자동) ===\n%s\n=== 끝 ===\n' "{{prev}}"
+
+  - type: llm
+    name: draft-replies
+    prompt: |
+      For each row in the classification table below, write a short Korean reply
+      draft that a CS agent could send with light edits.
+
+      Tone: 친근하지만 전문적인 존댓말. 사과는 필요한 경우에만, 진심이 묻어나게.
+
+      Rules per category:
+      - 환불요청·제품파손·결제오류: 즉시 처리 의지를 첫 문장에. 추가로 받아야 할 정보(주문번호, 사진, 영수증 등) 1줄. 회신 기한 명시(영업일 1일 이내 등).
+      - 배송지연: 짧은 사과 + 송장 확인 후 24시간 내 회신 약속 + 다음 구매 5% 쿠폰 보상.
+      - 제품문의: 질문에 정확히 답변 + 추가 문의 채널 안내.
+      - 감사·관심: 짧고 따뜻하게 + 신제품 사전 알림 신청 링크 안내.
+
+      Format each row exactly as:
+      ### [id] 고객명
+      <답변 본문 3-5 lines>
+
+      Process all rows in the same order as the input table.
+      Output in Korean only, no preamble outside the headers.
+
+      ---
+      {{prev}}
+      ---

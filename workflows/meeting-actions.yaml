@@ -1,0 +1,54 @@
+name: meeting-actions
+description: 한국어 회의록에서 액션 아이템·담당자·마감일을 뽑아 Slack 보고 포맷으로 정리합니다.
+persona: 운영 / PM
+stressRelieved: 회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하
+steps:
+  - type: shell
+    name: load-notes
+    command: |
+      cat workflows/fixtures/meeting-notes-2026-w19.md
+
+  - type: llm
+    name: extract-actions
+    prompt: |
+      You are reading a Korean weekly meeting note. Extract every actionable
+      item that has a clear owner OR a clear deadline (or both).
+
+      For each item, identify:
+      - 담당자 (owner) — exact name from the note
+      - 마감일 (deadline) — ISO date (YYYY-MM-DD) when explicit, "미정" otherwise
+      - 액션 (task) — one short Korean sentence, imperative form
+
+      Output a single Korean Markdown table with header row:
+      | 담당자 | 마감일 | 액션 |
+
+      Output the table only — no preamble, no trailing commentary.
+      Output in Korean only.
+
+      ---
+      {{prev}}
+      ---
+
+  - type: shell
+    name: stamp-report
+    command: |
+      printf '=== 주간 액션 아이템 (자동 추출) ===\n%s\n=== 끝 ===\n' "{{prev}}"
+
+  - type: llm
+    name: slack-format
+    prompt: |
+      Reformat the following action-item table into a Slack-ready Korean
+      summary message.
+
+      Rules:
+      - Start with one greeting line (예: "이번 주 액션 아이템 정리해드릴게요 👇").
+      - Then group by 담당자. For each owner, use the pattern:
+        *담당자*
+        • [마감일] 액션
+      - Keep total length under 130 Korean words.
+      - Use friendly but professional tone. No bureaucratic phrases.
+      - Output in Korean only, no preamble outside the greeting line.
+
+      ---
+      {{prev}}
+      ---
