@@ -1,0 +1,154 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailForm from '../components/EmailForm.astro';
+
+const REPO_URL = 'https://github.com/wndnjs3865/flowagent';
+const RELEASES_URL = `${REPO_URL}/releases`;
+
+const upcomingCategories = [
+  {
+    badge: 'Changelog',
+    title: '버전별 출시 노트',
+    description:
+      '새 기능·버그 수정·호환성 변경 사항을 매 릴리스마다 정리. 첫 글: v0.1.0 출시 노트.',
+    sample: 'v0.1.0 · v0.2.0 Desktop App 출시 · v0.3.0 Pro Sync',
+  },
+  {
+    badge: 'Pilot 사례',
+    title: '실제 적용 사례',
+    description:
+      'Pilot 참여사들이 어떤 반복 업무를 어떻게 줄였는지. 데이터·코드·결과 비교까지 공유 (회사명은 동의 시).',
+    sample: '주 8시간 → 30분 주간 리포트 · 결재함 자동 분류 · CS 응답 초안',
+  },
+  {
+    badge: '기술 노트',
+    title: '개발 관점·디자인 결정',
+    description:
+      '왜 YAML 기반인가, LLM 셸 단계의 보안 모델, Tauri vs Electron, Local-first sync 설계 등.',
+    sample: 'plain YAML 결정 이유 · sandboxed shell · CRDT vs LWW',
+  },
+];
+---
+
+<BaseLayout
+  title="블로그 — FlowAgent"
+  description="FlowAgent 블로그 — Changelog, Pilot 사례, 기술 노트. 곧 첫 글 게시 예정."
+>
+  <!-- ───────────────────────────────────────────────────────  HERO  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div
+      class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 sm:py-20"
+    >
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+      >
+        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+        Coming Soon · 곧 첫 글 게시 예정
+      </div>
+
+      <h1
+        class="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50"
+      >
+        블로그
+      </h1>
+      <p
+        class="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400"
+      >
+        Changelog · Pilot 사례 · 기술 노트 — 곧 글을 올리기 시작합니다.
+        지금은 GitHub Releases에서 버전 변경 사항을 확인하실 수 있어요.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  UPCOMING CATEGORIES  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <div class="max-w-2xl">
+        <div
+          class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400"
+        >
+          어떤 글을 쓸 예정인가요
+        </div>
+        <h2
+          class="mt-3 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+        >
+          3개 카테고리, 한 줄에 하나씩
+        </h2>
+      </div>
+
+      <ul class="mt-10 grid gap-5 md:grid-cols-3">
+        {
+          upcomingCategories.map((cat) => (
+            <li class="flex flex-col rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+              <div class="inline-flex w-fit rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+                {cat.badge}
+              </div>
+              <h3 class="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                {cat.title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {cat.description}
+              </p>
+              <div class="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+                <p class="text-xs text-zinc-500 dark:text-zinc-500">예시 주제</p>
+                <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{cat.sample}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  EMAIL WAITLIST  ─── -->
+  <section
+    class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <div class="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
+      <h2
+        class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        첫 글 게시 시 알려드릴게요
+      </h2>
+      <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+        스팸 없음 · 주 1회 이하 · 메일 주소만 사용.
+      </p>
+      <div class="mt-8 flex justify-center">
+        <EmailForm
+          variant="inline"
+          source="blog-waitlist"
+          buttonText="블로그 알림 받기"
+        />
+      </div>
+
+      <p class="mt-8 text-xs text-zinc-500 dark:text-zinc-500">
+        그 사이 변경 사항은 <a
+          href={RELEASES_URL}
+          rel="noopener"
+          class="underline-offset-4 hover:text-zinc-900 hover:underline dark:hover:text-zinc-100"
+          >GitHub Releases ↗</a
+        >에서 확인하실 수 있어요.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  FOOTER CTA  ─── -->
+  <section>
+    <div
+      class="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20"
+    >
+      <p class="text-lg font-medium text-zinc-700 dark:text-zinc-300">
+        Your workflows are <span class="font-semibold text-zinc-900 dark:text-zinc-100">plain YAML files</span>.<br />
+        Your data stays on <span class="font-semibold text-zinc-900 dark:text-zinc-100">your machine</span>.
+      </p>
+      <div class="mt-8">
+        <a
+          href="/download"
+          class="inline-flex items-center justify-center gap-2 rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+        >
+          무료 다운로드
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

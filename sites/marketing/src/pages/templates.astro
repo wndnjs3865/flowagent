@@ -1,0 +1,269 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailForm from '../components/EmailForm.astro';
+
+const REPO_URL = 'https://github.com/wndnjs3865/flowagent';
+const WORKFLOWS_DIR_URL = `${REPO_URL}/tree/main/workflows`;
+
+// Templates currently bundled with v0.1.0 (workflows/ directory)
+const templates = [
+  {
+    slug: 'approval-triage',
+    title: 'approval-triage',
+    steps: 4,
+    category: '총무 / 사무관리',
+    description:
+      '결재함에 쌓인 요청을 자동승인·관리자 검토·정보 부족으로 분류하고 "오늘 처리할 결재" brief를 만듭니다.',
+    burden: '결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하',
+  },
+  {
+    slug: 'inquiry-triage',
+    title: 'inquiry-triage',
+    steps: 4,
+    category: 'CS팀 / 운영',
+    description:
+      '오늘 접수된 한국어 고객 문의를 카테고리·긴급도로 분류하고 카테고리별 답변 초안까지 만듭니다.',
+    burden: '매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로',
+  },
+  {
+    slug: 'meeting-actions',
+    title: 'meeting-actions',
+    steps: 4,
+    category: '운영 / PM',
+    description:
+      '한국어 회의록에서 액션 아이템·담당자·마감일을 뽑아 Slack 보고 포맷으로 정리합니다.',
+    burden: '회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하',
+  },
+  {
+    slug: 'sales-summary',
+    title: 'sales-summary',
+    steps: 4,
+    category: '영업관리 / 대표 보고',
+    description: '월간 매출 CSV를 한국어 경영진 1-pager 리포트로 변환합니다.',
+    burden: '월말마다 이상치 찾고 1-pager 만드는 압박',
+  },
+  {
+    slug: 'weekly-report-demo',
+    title: 'weekly-report-demo',
+    steps: 3,
+    category: '팀 리드 / 매니저',
+    description:
+      '3-step demo — LLM으로 주간 요약 초안, shell로 가공, LLM으로 Slack용 다듬기.',
+    burden: '매주 같은 보고서를 처음부터 다시 쓰는 30분',
+  },
+];
+---
+
+<BaseLayout
+  title="템플릿 — FlowAgent"
+  description="FlowAgent 기본 워크플로우 5종 + 프리미엄 템플릿 갤러리 준비 중. 모든 템플릿은 plain YAML 파일로 GitHub에서 바로 확인 가능."
+>
+  <!-- ───────────────────────────────────────────────────────  HERO  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div
+      class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 sm:py-20"
+    >
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+      >
+        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+        Coming Soon · 프리미엄 템플릿 갤러리 준비 중
+      </div>
+
+      <h1
+        class="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50"
+      >
+        템플릿
+      </h1>
+      <p
+        class="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400"
+      >
+        v0.1.0에 기본 워크플로우 5종이 함께 옵니다. 카테고리별 프리미엄
+        템플릿 갤러리는 Pro 출시와 함께 오픈 예정.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  AVAILABLE NOW  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div class="max-w-2xl">
+          <div
+            class="text-xs font-mono font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400"
+          >
+            지금 사용 가능
+          </div>
+          <h2
+            class="mt-3 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+          >
+            기본 워크플로우 5종
+          </h2>
+          <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+            v0.1.0 zip에 포함됩니다. 다운로드 후 압축 풀면 <code
+              class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
+              >workflows/</code
+            > 폴더에 모두 들어있어요. YAML 파일을 그대로 열어 읽고, 복사하고,
+            수정해서 본인 데이터에 맞게 사용하세요.
+          </p>
+        </div>
+        <a
+          href={WORKFLOWS_DIR_URL}
+          rel="noopener"
+          class="inline-flex shrink-0 items-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          GitHub에서 보기 ↗
+        </a>
+      </div>
+
+      <ul class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {
+          templates.map((t) => (
+            <li class="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+              <div class="flex items-start justify-between gap-3">
+                <div class="font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {t.title}
+                </div>
+                <span class="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+                  {t.steps}단계
+                </span>
+              </div>
+              <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
+                {t.category}
+              </div>
+              <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {t.description}
+              </p>
+              <div class="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+                <p class="text-xs italic text-zinc-500 dark:text-zinc-500">
+                  덜어주는 부담: {t.burden}
+                </p>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-3 text-xs">
+                <a
+                  href={`${WORKFLOWS_DIR_URL}/${t.slug}.yaml`}
+                  rel="noopener"
+                  class="inline-flex items-center gap-1 text-brand-600 underline-offset-4 hover:underline dark:text-brand-400"
+                >
+                  YAML 소스 보기 ↗
+                </a>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="mt-8 text-sm text-zinc-500 dark:text-zinc-500">
+        💡 새 워크플로우를 추가하려면 <code
+          class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
+          >workflows/&lt;slug&gt;.yaml</code
+        > 파일을 만든 뒤 서버를 새로고침하세요. 자세한 스키마는 <a
+          href="/docs"
+          class="underline-offset-4 hover:text-zinc-900 hover:underline dark:hover:text-zinc-100"
+          >문서</a
+        >에서.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  COMING — PREMIUM GALLERY  ─── -->
+  <section
+    class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+      <div class="max-w-2xl">
+        <div
+          class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-300"
+        >
+          Pro 출시와 함께 오픈 · 약 1개월
+        </div>
+        <h2
+          class="mt-4 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+        >
+          프리미엄 템플릿 갤러리
+        </h2>
+        <p class="mt-3 leading-relaxed text-zinc-600 dark:text-zinc-400">
+          업종·직무·도메인별로 큐레이션된 워크플로우 갤러리. 한 번 클릭으로
+          내 FlowAgent에 설치, 본인 데이터에 맞춰 변수만 채우면 바로 사용 가능.
+        </p>
+      </div>
+
+      <div class="mt-10 grid gap-4 md:grid-cols-3">
+        <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950">
+          <div class="text-xs font-mono font-semibold text-zinc-500 dark:text-zinc-500">
+            COMING
+          </div>
+          <h3 class="mt-2 font-semibold text-zinc-900 dark:text-zinc-100">
+            영업·CS 시리즈
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            견적서 자동 작성, 협상 단계별 follow-up, NPS 응답 분류 등 15+
+            템플릿 예정.
+          </p>
+        </div>
+        <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950">
+          <div class="text-xs font-mono font-semibold text-zinc-500 dark:text-zinc-500">
+            COMING
+          </div>
+          <h3 class="mt-2 font-semibold text-zinc-900 dark:text-zinc-100">
+            엔지니어링·QA
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            PR 리뷰 요약, 인시던트 포스트모템 초안, 릴리스 노트 자동 생성 등.
+          </p>
+        </div>
+        <div class="rounded-xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950">
+          <div class="text-xs font-mono font-semibold text-zinc-500 dark:text-zinc-500">
+            COMING
+          </div>
+          <h3 class="mt-2 font-semibold text-zinc-900 dark:text-zinc-100">
+            대표·경영 시리즈
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            주간 경영 대시보드, 투자자 업데이트 메일, 팀 OKR 진척도 정리.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10">
+        <p class="text-sm text-zinc-600 dark:text-zinc-400">
+          오픈 시 가장 먼저 알려드릴게요.
+        </p>
+        <div class="mt-3">
+          <EmailForm
+            variant="inline"
+            source="templates-waitlist"
+            buttonText="갤러리 오픈 알림 받기"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  FOOTER CTA  ─── -->
+  <section>
+    <div
+      class="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20"
+    >
+      <p class="text-lg font-medium text-zinc-700 dark:text-zinc-300">
+        Your workflows are <span class="font-semibold text-zinc-900 dark:text-zinc-100">plain YAML files</span>.<br />
+        템플릿도 같아요 — 열고, 읽고, 본인 것으로 만들 수 있습니다.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a
+          href={WORKFLOWS_DIR_URL}
+          rel="noopener"
+          class="inline-flex items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-5 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          GitHub 워크플로우 폴더 ↗
+        </a>
+        <a
+          href="/download"
+          class="inline-flex items-center justify-center gap-2 rounded-md bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+        >
+          무료 다운로드
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
