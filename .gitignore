@@ -11,3 +11,11 @@ runs/*.jsonl
 # Local snapshot backups (not source of truth)
 backup_full_20260511/
 backup_*/
+
+# Screenshots produced by scripts/snap.mjs during local dev
+scripts/*.png
+
+# Astro marketing site
+sites/*/dist/
+sites/*/.astro/
+sites/*/.vercel/

@@ -1,0 +1,836 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailForm from '../components/EmailForm.astro';
+
+// ─── Pricing constants (단위: 원, KRW) ─────────────────────────────────
+const PRO_MONTHLY = 12000;
+const PRO_YEARLY = 115200; // 12000 * 12 * 0.8 (20% off)
+const PRO_YEARLY_PER_MONTH = 9600; // 115200 / 12
+const TEAM_MONTHLY = 20000;
+const TEAM_YEARLY = 192000; // 20000 * 12 * 0.8
+const TEAM_YEARLY_PER_MONTH = 16000;
+const TEAM_MIN_SEATS = 3;
+const ANNUAL_DISCOUNT_PCT = 20;
+
+const fmt = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
+
+// ─── Comparison matrix (§5의 매트릭스) ─────────────────────────────────
+type Cell = true | false | string;
+type Row = { label: string; cells: [Cell, Cell, Cell, Cell] };
+type Group = { category: string; rows: Row[] };
+
+const compareGroups: Group[] = [
+  {
+    category: '코어 (전 플랜 공통)',
+    rows: [
+      { label: '워크플로우 수', cells: ['무제한', '무제한', '무제한', '무제한'] },
+      { label: '실행 횟수', cells: ['무제한', '무제한', '무제한', '무제한'] },
+      { label: '로컬 데이터 저장', cells: [true, true, true, true] },
+      { label: '오픈소스 (git clone)', cells: [true, true, true, true] },
+      { label: 'API 키 본인 소유', cells: [true, true, true, true] },
+      { label: '자동 업데이트', cells: [true, true, true, '관리자 제어'] },
+      { label: '기본 템플릿 갤러리', cells: [true, true, true, true] },
+    ],
+  },
+  {
+    category: 'Sync & 백업',
+    rows: [
+      { label: 'Multi-device sync', cells: [false, '3 devices', '시트당', '무제한'] },
+      { label: 'Cloud run history backup', cells: [false, '90일', '1년', '무제한'] },
+      { label: '설정 sync', cells: [false, true, true, true] },
+      { label: 'E2E 암호화', cells: [false, true, true, true] },
+    ],
+  },
+  {
+    category: '팀 협업',
+    rows: [
+      { label: 'Team workspace', cells: [false, false, true, true] },
+      { label: 'Shared workflows', cells: [false, false, true, true] },
+      { label: '권한 관리 (admin/member)', cells: [false, false, true, '커스텀 역할'] },
+      { label: '감사 로그 (audit)', cells: [false, false, '30일', '무제한 + export'] },
+    ],
+  },
+  {
+    category: '템플릿 & API',
+    rows: [
+      { label: '프리미엄 템플릿', cells: [false, '월 1-2개', true, '커스텀 가능'] },
+      { label: '팀 전용 템플릿', cells: [false, false, true, true] },
+      { label: '개인 API 토큰', cells: [false, true, true, true] },
+    ],
+  },
+  {
+    category: '엔터프라이즈',
+    rows: [
+      { label: 'SSO / SAML', cells: [false, false, false, true] },
+      { label: '자체 호스팅 Sync 서버', cells: [false, false, '옵션', true] },
+      { label: 'Vault 연동 (사내 키 관리)', cells: [false, false, false, true] },
+      { label: '사업자 인보이스 / 세금계산서', cells: [false, true, true, true] },
+    ],
+  },
+  {
+    category: '지원',
+    rows: [
+      { label: '지원 채널', cells: ['커뮤니티', 'Email 48h', 'Slack 24h', '전담 CSM'] },
+      { label: '온보딩 세션', cells: [false, false, '1회 무료', '맞춤 진행'] },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="가격 — FlowAgent"
+  description="Free는 평생 무료. Pro 12,000원/월부터. 워크플로우 개수·실행 횟수에는 제한이 없어요. 결제는 여러 기기 sync와 팀 협업이 필요할 때부터."
+>
+  <!-- ───────────────────────────────────────────────────────  HERO  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 sm:py-20">
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+      >
+        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+        약 1개월 뒤 Pro 출시 예정
+      </div>
+
+      <h1
+        class="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50"
+      >
+        가격
+      </h1>
+      <p
+        class="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400"
+      >
+        Free는 평생 무료. 결제는 <span
+          class="font-semibold text-zinc-900 dark:text-zinc-100"
+          >여러 기기 sync</span
+        >나 <span
+          class="font-semibold text-zinc-900 dark:text-zinc-100"
+          >팀 공유</span
+        >가 필요해질 때부터.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  BILLING TOGGLE  ─── -->
+  <section>
+    <div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+      <div class="flex flex-col items-center gap-3">
+        <div
+          class="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900"
+          role="tablist"
+          aria-label="결제 주기 선택"
+        >
+          <button
+            type="button"
+            data-billing="monthly"
+            class="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-zinc-100"
+            aria-selected="true"
+            role="tab"
+          >
+            월간 결제
+          </button>
+          <button
+            type="button"
+            data-billing="yearly"
+            class="rounded-full px-4 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            aria-selected="false"
+            role="tab"
+          >
+            연간 결제
+            <span
+              class="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              >20% 할인</span
+            >
+          </button>
+        </div>
+        <p class="text-xs text-zinc-500 dark:text-zinc-500">
+          표시는 원화(KRW), 부가세 별도. 사업자등록증 첨부 시 세금계산서 발행.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  4 PRICING CARDS  ─── -->
+  <section>
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12">
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <!-- ─── FREE ─── -->
+        <div
+          class="flex flex-col rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            Free
+          </div>
+          <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+            노트북 1대, 평생 무료
+          </p>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span
+                class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                >₩0</span
+              >
+              <span class="text-sm text-zinc-500 dark:text-zinc-500">/영구</span>
+            </div>
+            <p class="mt-1 h-4 text-xs text-zinc-500 dark:text-zinc-500"></p>
+          </div>
+          <a
+            href="/download"
+            class="mt-5 inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          >
+            지금 다운로드
+          </a>
+          <ul class="mt-6 space-y-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              워크플로우 무제한
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              실행 횟수 무제한
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              모든 데이터 로컬
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              오픈소스 · git clone
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              자동 업데이트
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              커뮤니티 지원
+            </li>
+          </ul>
+        </div>
+
+        <!-- ─── PRO (recommended) ─── -->
+        <div
+          class="relative flex flex-col rounded-2xl border-2 border-brand-500 bg-white p-6 shadow-lg dark:border-brand-400 dark:bg-zinc-950"
+        >
+          <div
+            class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white"
+          >
+            곧 출시 · 약 1개월
+          </div>
+          <div class="text-sm font-semibold text-brand-600 dark:text-brand-400">
+            Pro
+          </div>
+          <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+            여러 기기 sync, 우선 지원
+          </p>
+          <div class="mt-5">
+            <div data-price-monthly class="flex items-baseline gap-1">
+              <span
+                class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                >₩{fmt(PRO_MONTHLY)}</span
+              >
+              <span class="text-sm text-zinc-500 dark:text-zinc-500">/월</span>
+            </div>
+            <div data-price-yearly class="hidden">
+              <div class="flex items-baseline gap-1">
+                <span
+                  class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                  >₩{fmt(PRO_YEARLY_PER_MONTH)}</span
+                >
+                <span class="text-sm text-zinc-500 dark:text-zinc-500">/월</span>
+              </div>
+              <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                연 ₩{fmt(PRO_YEARLY)} 청구 · {ANNUAL_DISCOUNT_PCT}% 할인
+              </p>
+            </div>
+            <p
+              data-price-monthly-note
+              class="mt-1 h-4 text-xs text-zinc-500 dark:text-zinc-500"
+            >
+              연간 결제 시 {ANNUAL_DISCOUNT_PCT}% 할인
+            </p>
+          </div>
+          <button
+            type="button"
+            class="mt-5 inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
+            data-scroll-to="#waitlist"
+          >
+            Pro 출시 알림 받기
+          </button>
+          <ul class="mt-6 space-y-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+            <li class="flex items-start gap-2 font-medium text-zinc-900 dark:text-zinc-100">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              Free 모든 기능 +
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              3개 기기까지 sync (E2E 암호화)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              실행 이력 90일 클라우드 백업
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              프리미엄 템플릿 (월 1-2개 신규)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              개인 API 토큰
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              이메일 우선 지원 (48시간 내)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              사업자 인보이스 발행
+            </li>
+          </ul>
+        </div>
+
+        <!-- ─── TEAM ─── -->
+        <div
+          class="flex flex-col rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            Team
+          </div>
+          <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+            동료와 같은 워크플로우 공유
+          </p>
+          <div class="mt-5">
+            <div data-price-monthly class="flex items-baseline gap-1">
+              <span
+                class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                >₩{fmt(TEAM_MONTHLY)}</span
+              >
+              <span class="text-sm text-zinc-500 dark:text-zinc-500"
+                >/시트/월</span
+              >
+            </div>
+            <div data-price-yearly class="hidden">
+              <div class="flex items-baseline gap-1">
+                <span
+                  class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                  >₩{fmt(TEAM_YEARLY_PER_MONTH)}</span
+                >
+                <span class="text-sm text-zinc-500 dark:text-zinc-500"
+                  >/시트/월</span
+                >
+              </div>
+              <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                연 ₩{fmt(TEAM_YEARLY)}/시트 · {ANNUAL_DISCOUNT_PCT}% 할인
+              </p>
+            </div>
+            <p class="mt-1 h-4 text-xs text-zinc-500 dark:text-zinc-500">
+              {TEAM_MIN_SEATS} 시트부터 · 연간 결제 시 {ANNUAL_DISCOUNT_PCT}% 할인
+            </p>
+          </div>
+          <button
+            type="button"
+            class="mt-5 inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            data-scroll-to="#waitlist"
+          >
+            Team 출시 알림 받기
+          </button>
+          <ul class="mt-6 space-y-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+            <li class="flex items-start gap-2 font-medium text-zinc-900 dark:text-zinc-100">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              Pro 모든 기능 +
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              팀 워크스페이스
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              워크플로우 팀 공유
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              권한 관리 (admin / member)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              감사 로그 30일
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              Slack 우선 지원 (24시간 내)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              온보딩 1회 무료
+            </li>
+          </ul>
+        </div>
+
+        <!-- ─── ENTERPRISE ─── -->
+        <div
+          class="flex flex-col rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            Enterprise
+          </div>
+          <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+            사내 보안 · 자체 호스팅
+          </p>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span
+                class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+                >문의</span
+              >
+            </div>
+            <p class="mt-1 h-4 text-xs text-zinc-500 dark:text-zinc-500">
+              규모·요건에 맞춰 견적
+            </p>
+          </div>
+          <a
+            href="mailto:wndnjs3865@naver.com?subject=FlowAgent%20Enterprise%20%EB%AC%B8%EC%9D%98"
+            class="mt-5 inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+          >
+            영업팀 문의
+          </a>
+          <ul class="mt-6 space-y-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+            <li class="flex items-start gap-2 font-medium text-zinc-900 dark:text-zinc-100">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              Team 모든 기능 +
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              SSO / SAML 인증
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              자체 호스팅 Sync 서버
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              감사 로그 무제한 + export
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              Vault 연동 (사내 키 관리)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              전담 CSM (Customer Success)
+            </li>
+            <li class="flex items-start gap-2">
+              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
+              맞춤 온보딩 + 분기 리뷰
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  TRIGGER SCENARIOS  ─── -->
+  <section
+    class="border-y border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <div class="max-w-2xl">
+        <h2
+          class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+        >
+          언제 결제할지가 정해져 있어요
+        </h2>
+        <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+          "기능 잠금 풀려고" 결제하는 게 아니라, 사용 패턴이 바뀌었을 때 자연스럽게 다음 단계로.
+        </p>
+      </div>
+
+      <div class="mt-10 grid gap-5 md:grid-cols-3">
+        <div
+          class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
+          >
+            → Pro
+          </div>
+          <h3
+            class="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+          >
+            "2번째 기기를 쓰기 시작했다"
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            노트북에서 만든 워크플로우를 데스크탑·회사 PC에서도 그대로 쓰고
+            싶을 때. 3대까지 자동 sync.
+          </p>
+        </div>
+
+        <div
+          class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
+          >
+            → Team
+          </div>
+          <h3
+            class="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+          >
+            "동료한테 이 워크플로우 공유하고 싶다"
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            팀 워크스페이스에서 같은 워크플로우를 함께 관리. 누가 뭘 바꿨는지
+            감사 로그로 추적.
+          </p>
+        </div>
+
+        <div
+          class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
+          >
+            → Enterprise
+          </div>
+          <h3
+            class="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+          >
+            "사내 보안팀이 클라우드 sync 막음"
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            자체 호스팅 sync 서버 + SSO + 감사 로그. 법무·보안 요건을 통과시켜야
+            할 때.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  FULL COMPARISON TABLE  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+      <h2
+        class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        전체 기능 비교
+      </h2>
+      <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+        모바일에서는 좌우로 스와이프하면 4개 플랜을 모두 볼 수 있어요.
+      </p>
+
+      <div
+        class="mt-8 overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800"
+      >
+        <table class="w-full min-w-[640px] border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
+              <th
+                class="sticky left-0 z-10 bg-zinc-50 px-4 py-3 text-left font-semibold text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                scope="col">기능</th>
+              <th
+                class="px-4 py-3 text-center font-semibold text-zinc-900 dark:text-zinc-100"
+                scope="col">Free</th>
+              <th
+                class="px-4 py-3 text-center font-semibold text-brand-600 dark:text-brand-400"
+                scope="col">Pro</th>
+              <th
+                class="px-4 py-3 text-center font-semibold text-zinc-900 dark:text-zinc-100"
+                scope="col">Team</th>
+              <th
+                class="px-4 py-3 text-center font-semibold text-zinc-900 dark:text-zinc-100"
+                scope="col">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            {compareGroups.map((group) => (
+              <>
+                <tr class="border-t border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/50">
+                  <td
+                    class="sticky left-0 z-10 bg-zinc-50/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:bg-zinc-900/50 dark:text-zinc-500"
+                    colspan="5">{group.category}</td>
+                </tr>
+                {group.rows.map((row) => (
+                  <tr class="border-t border-zinc-100 dark:border-zinc-800/60">
+                    <th
+                      scope="row"
+                      class="sticky left-0 z-10 bg-white px-4 py-3 text-left font-normal text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
+                      >{row.label}</th>
+                    {row.cells.map((cell) => (
+                      <td class="px-4 py-3 text-center text-zinc-700 dark:text-zinc-300">
+                        {cell === true && (
+                          <svg
+                            class="mx-auto h-4 w-4 text-emerald-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            aria-label="포함됨"
+                          ><path
+                              fill-rule="evenodd"
+                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                              clip-rule="evenodd"></path></svg>
+                        )}
+                        {cell === false && (
+                          <span class="text-zinc-300 dark:text-zinc-700" aria-label="미포함">—</span>
+                        )}
+                        {typeof cell === 'string' && (
+                          <span class="text-xs text-zinc-700 dark:text-zinc-300">{cell}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  KOREA PAYMENT INFO  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-20">
+      <h2
+        class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        한국 결제 안내
+      </h2>
+      <p class="mt-3 max-w-2xl text-zinc-600 dark:text-zinc-400">
+        한국 사업자·개인 모두 편하게. 토스페이먼츠 연동은 Pro 출시와 함께 오픈
+        예정.
+      </p>
+
+      <dl class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            결제 수단
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            신용·체크카드 (국내·해외), 토스페이먼츠 (예정), 사업자 계좌이체
+            (Enterprise).
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            세금계산서 발행
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            사업자등록증 첨부 시 부가세 별도 자동 처리. Pro 이상에서 가능.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            화폐 단위
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            원화(KRW) 청구. 해외 카드 결제도 원화 표시 — 환차손 없음.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            환불
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            결제일로부터 14일 내 사용 이력 없으면 전액 환불. 부분 사용 후
+            연간 결제 해지는 일할 계산.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            플랜 변경
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            언제든 업/다운그레이드 가능. 다운그레이드는 다음 청구 주기부터
+            적용.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            데이터
+          </dt>
+          <dd class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            결제 중단 시에도 로컬 워크플로우·실행 이력은 그대로. Sync 기능만
+            비활성화됩니다.
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  FAQ  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
+      <h2
+        class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        자주 묻는 질문
+      </h2>
+
+      <div class="mt-10 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            Free에서도 진짜 모든 게 다 되나요?
+            <svg
+              class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            네. 워크플로우 개수, 실행 횟수, 데이터 저장 모두 제한 없습니다.
+            Pro는 "여러 기기 동기화"·"팀 공유"처럼 Free 하나로는 못 하는
+            <em>추가</em> 기능을 더하는 거지, Free 기능을 잠그는 게 아니에요.
+          </p>
+        </details>
+
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            Pro는 언제 출시되나요?
+            <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            현재 Beta 운영 중이며, 약 1개월 뒤 정식 출시 예정입니다. 알림 신청을
+            남기시면 출시 즉시 메일로 안내드립니다 (스팸 없음 · 출시 1회만).
+          </p>
+        </details>
+
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            결제 중단 시 데이터는 어떻게 되나요?
+            <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            로컬에 있는 워크플로우와 실행 이력은 그대로 유지됩니다. Sync 기능만
+            중단되고, Free 플랜으로 자동 전환됩니다. 데이터 export는 어느
+            시점에든 plain YAML 파일로 가능해요.
+          </p>
+        </details>
+
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            API 키는 어디에 저장되나요? 클라우드로 보내지 않는다고요?
+            <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            Anthropic API 키는 오직 사용자의 컴퓨터에만 저장됩니다 (Pro 출시
+            후에는 OS 키체인 사용 예정). FlowAgent 서버로 키를 전송하지
+            않으며, sync 대상에서도 항상 제외됩니다. 정말로요.
+          </p>
+        </details>
+
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            환불 정책은 어떻게 되나요?
+            <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            결제일로부터 14일 내, 한 번도 sync·premium 템플릿을 사용하지
+            않으셨다면 전액 환불해드립니다. 연간 결제 중도 해지는 사용한 일수만큼
+            제외하고 일할 환불.
+          </p>
+        </details>
+
+        <details class="group py-5">
+          <summary
+            class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
+          >
+            기업용 자체 호스팅(on-premise)도 가능한가요?
+            <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </summary>
+          <p class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            Enterprise 플랜에서 Sync 서버를 사내 인프라에 직접 배포할 수
+            있습니다. Docker 이미지 + 설치 가이드 + 초기 셋업 지원 포함.
+            영업팀에 문의 주세요.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────  FINAL CTA  ─── -->
+  <section id="waitlist">
+    <div class="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"
+      >
+        Pro 출시까지 약 1개월
+      </div>
+      <h2
+        class="mt-4 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-100"
+      >
+        지금은 Free로 시작하세요
+      </h2>
+      <p class="mt-4 text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
+        결제 트리거가 오기 전에는 Free 하나로 충분해요.<br />
+        Pro·Team이 필요해질 때 가장 먼저 알려드릴게요.
+      </p>
+
+      <div class="mt-8 flex justify-center">
+        <EmailForm
+          variant="inline"
+          source="pricing-waitlist"
+          buttonText="출시 알림 받기"
+        />
+      </div>
+
+      <div class="mt-8">
+        <a
+          href="/download"
+          class="inline-flex items-center justify-center gap-2 text-sm font-medium text-zinc-700 underline-offset-4 hover:text-zinc-900 hover:underline dark:text-zinc-300 dark:hover:text-zinc-100"
+        >
+          또는 지금 무료로 다운로드 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // ─── Billing toggle (월간 / 연간) ──────────────────────────────────
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-billing]');
+  const monthlyEls = document.querySelectorAll<HTMLElement>('[data-price-monthly]');
+  const yearlyEls = document.querySelectorAll<HTMLElement>('[data-price-yearly]');
+
+  const setBilling = (mode: 'monthly' | 'yearly') => {
+    monthlyEls.forEach((el) => el.classList.toggle('hidden', mode !== 'monthly'));
+    yearlyEls.forEach((el) => el.classList.toggle('hidden', mode !== 'yearly'));
+
+    buttons.forEach((btn) => {
+      const active = btn.dataset.billing === mode;
+      btn.setAttribute('aria-selected', String(active));
+      if (active) {
+        btn.classList.add('bg-white', 'text-zinc-900', 'shadow-sm', 'dark:bg-zinc-950', 'dark:text-zinc-100');
+        btn.classList.remove('text-zinc-600', 'dark:text-zinc-400');
+      } else {
+        btn.classList.remove('bg-white', 'text-zinc-900', 'shadow-sm', 'dark:bg-zinc-950', 'dark:text-zinc-100');
+        btn.classList.add('text-zinc-600', 'dark:text-zinc-400');
+      }
+    });
+  };
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.billing as 'monthly' | 'yearly';
+      setBilling(mode);
+    });
+  });
+
+  // ─── Scroll-to-anchor on CTA clicks ────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('[data-scroll-to]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.scrollTo;
+      if (!target) return;
+      const el = document.querySelector(target);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>

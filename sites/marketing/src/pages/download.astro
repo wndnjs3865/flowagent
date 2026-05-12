@@ -1,0 +1,573 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailForm from '../components/EmailForm.astro';
+
+// ─── Release info — bump these when a new version ships ──────────────────
+const VERSION = '0.1.0';
+const RELEASE_DATE = '2026-05-12';
+// GitHub release tag uses bare version (no `v` prefix) — confirmed via API.
+const RELEASE_PAGE = `https://github.com/wndnjs3865/flowagent/releases/tag/${VERSION}`;
+const ZIP_FILENAME = `flowagent-v${VERSION}.zip`;
+const ZIP_URL = `https://github.com/wndnjs3865/flowagent/releases/download/${VERSION}/${ZIP_FILENAME}`;
+const ZIP_SIZE = '≈233 KB · 소스만 (첫 실행 시 의존성 자동 설치)';
+const ZIP_SHA256 = 'c77fdd109ae79abc060b0a2cdee39dcd7e6cc3d6c93058d80790f88240b57632';
+
+const REPO_URL = 'https://github.com/wndnjs3865/flowagent';
+const REPO_GIT_URL = 'https://github.com/wndnjs3865/flowagent.git';
+---
+
+<BaseLayout
+  title="다운로드 — FlowAgent"
+  description="FlowAgent v0.1.0 다운로드. 압축 풀고 start.bat 더블클릭이면 끝. Windows · macOS · Linux 지원, 데이터는 100% 내 컴퓨터에."
+>
+  <!-- ───────────────────────────────────────────────────────  HERO  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div
+      class="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 sm:py-20"
+    >
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+      >
+        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+        v{VERSION} · 출시 {RELEASE_DATE} · Beta
+      </div>
+
+      <h1
+        class="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50"
+      >
+        FlowAgent 다운로드
+      </h1>
+      <p
+        class="mx-auto mt-4 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400"
+      >
+        압축 풀고 더블클릭 한 번이면 끝. 데이터는 내 컴퓨터를 떠나지 않습니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  PRIMARY DOWNLOAD CARD  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <div
+        class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-8"
+      >
+        <div
+          class="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            class="h-4 w-4 fill-current"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 6.342L9 5.16v5.34H2V6.342zM10 5l8-1.36V10H10V5zM2 11.5h7v3.34l-7-1.182V11.5zM10 11.5h8v6.36L10 16.5v-5z"
+            ></path>
+          </svg>
+          <span>감지된 OS:</span>
+          <strong
+            class="text-zinc-900 dark:text-zinc-100"
+            data-detected-name>Windows</strong
+          >
+        </div>
+
+        <h2
+          class="mt-4 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+        >
+          FlowAgent v{VERSION}
+        </h2>
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          크로스플랫폼 .zip · Windows는 <code
+            class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
+            >start.bat</code
+          > 더블클릭만으로 실행
+        </p>
+
+        <a
+          href={ZIP_URL}
+          rel="noopener"
+          class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 sm:w-auto"
+          data-download-cta
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            class="h-5 w-5 fill-current"
+            aria-hidden="true"
+          >
+            <path
+              d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"
+            ></path>
+            <path
+              d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"
+            ></path>
+          </svg>
+          <span data-cta-label>Windows용 다운로드 (.zip)</span>
+        </a>
+
+        <dl
+          class="mt-6 grid gap-2 border-t border-zinc-200 pt-5 text-sm dark:border-zinc-800"
+        >
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <dt class="w-20 shrink-0 text-zinc-500 dark:text-zinc-500">파일</dt>
+            <dd
+              class="font-mono text-xs text-zinc-800 sm:text-sm dark:text-zinc-200"
+            >
+              {ZIP_FILENAME} · {ZIP_SIZE}
+            </dd>
+          </div>
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <dt class="w-20 shrink-0 text-zinc-500 dark:text-zinc-500">
+              SHA256
+            </dt>
+            <dd
+              class="break-all font-mono text-xs text-zinc-600 dark:text-zinc-400"
+            >
+              {ZIP_SHA256}
+            </dd>
+          </div>
+          <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <dt class="w-20 shrink-0 text-zinc-500 dark:text-zinc-500">
+              출시일
+            </dt>
+            <dd class="text-zinc-800 dark:text-zinc-200">{RELEASE_DATE}</dd>
+          </div>
+        </dl>
+
+        <details
+          class="mt-4 text-sm text-zinc-600 dark:text-zinc-400"
+        >
+          <summary
+            class="cursor-pointer select-none font-medium text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100"
+          >
+            체크섬 확인 방법
+          </summary>
+          <div class="mt-3 space-y-2">
+            <div>
+              <div class="text-xs text-zinc-500 dark:text-zinc-500">Windows (PowerShell)</div>
+              <code
+                class="mt-1 block overflow-x-auto rounded bg-zinc-950 px-3 py-2 font-mono text-xs text-zinc-100"
+                >Get-FileHash {ZIP_FILENAME} -Algorithm SHA256</code
+              >
+            </div>
+            <div>
+              <div class="text-xs text-zinc-500 dark:text-zinc-500">macOS</div>
+              <code
+                class="mt-1 block overflow-x-auto rounded bg-zinc-950 px-3 py-2 font-mono text-xs text-zinc-100"
+                >shasum -a 256 {ZIP_FILENAME}</code
+              >
+            </div>
+            <div>
+              <div class="text-xs text-zinc-500 dark:text-zinc-500">Linux</div>
+              <code
+                class="mt-1 block overflow-x-auto rounded bg-zinc-950 px-3 py-2 font-mono text-xs text-zinc-100"
+                >sha256sum {ZIP_FILENAME}</code
+              >
+            </div>
+          </div>
+        </details>
+
+        <p
+          class="mt-5 border-t border-zinc-200 pt-4 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-500"
+        >
+          <a
+            href={RELEASE_PAGE}
+            rel="noopener"
+            class="inline-flex items-center gap-1 underline-offset-4 hover:text-zinc-900 hover:underline dark:hover:text-zinc-100"
+          >
+            GitHub Release 페이지 ↗
+          </a> · 변경 사항과 공식 체크섬을 함께 확인하세요.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  3-STEP QUICK START  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+      <div class="max-w-2xl">
+        <h2
+          class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+        >
+          1분 안에 첫 워크플로우 실행
+        </h2>
+        <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+          별도 설치 마법사 없음. 압축 풀고 더블클릭이면 Node.js·pnpm까지 자동
+          준비됩니다.
+        </p>
+      </div>
+
+      <ol class="mt-10 grid gap-4 md:grid-cols-3">
+        <li
+          class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="font-mono text-xs font-semibold text-brand-600 dark:text-brand-400"
+          >
+            STEP 1
+          </div>
+          <h3
+            class="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+          >
+            압축 풀기
+          </h3>
+          <p
+            class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+          >
+            다운받은 <code
+              class="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+              >.zip</code
+            >을 원하는 폴더에 압축 해제하세요.
+          </p>
+        </li>
+
+        <li
+          class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+          data-step-2
+        >
+          <div
+            class="font-mono text-xs font-semibold text-brand-600 dark:text-brand-400"
+          >
+            STEP 2
+          </div>
+          <h3
+            class="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+            data-step-2-title
+          >
+            start.bat 더블클릭
+          </h3>
+          <p
+            class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+            data-step-2-desc
+          >
+            cmd 창에서 Node·pnpm 자동 설치 → 서버 시작까지 한 번에.
+          </p>
+          <details
+            class="mt-3 text-xs text-zinc-500 dark:text-zinc-500"
+          >
+            <summary class="cursor-pointer select-none hover:text-zinc-700 dark:hover:text-zinc-300"
+              >macOS · Linux는?</summary
+            >
+            <p class="mt-2 leading-relaxed">
+              현재는 터미널에서 <code
+                class="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-900"
+                >pnpm install && pnpm dev</code
+              > 직접 실행. <code
+                class="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-900"
+                >start.sh</code
+              >는 v0.2.0에 포함 예정.
+            </p>
+          </details>
+        </li>
+
+        <li
+          class="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="font-mono text-xs font-semibold text-brand-600 dark:text-brand-400"
+          >
+            STEP 3
+          </div>
+          <h3
+            class="mt-2 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+          >
+            브라우저 자동 오픈
+          </h3>
+          <p
+            class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+          >
+            <code
+              class="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+              >http://localhost:3000</code
+            >에서 워크플로우 카드를 눌러 실행하세요.
+          </p>
+        </li>
+      </ol>
+
+      <p class="mt-8 text-xs text-zinc-500 dark:text-zinc-500">
+        ⓘ Anthropic API 키가 필요합니다. 첫 실행 시 메모장이 열리면 <code
+          class="rounded bg-zinc-100 px-1 py-0.5 font-mono dark:bg-zinc-900"
+          >ANTHROPIC_API_KEY=</code
+        > 뒤에 본인 키를 붙여넣고 저장하세요. 키는 컴퓨터에만 저장됩니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  PACKAGE MANAGERS  ─── -->
+  <section
+    class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+      <div class="max-w-2xl">
+        <h2
+          class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+        >
+          패키지 매니저로 설치
+        </h2>
+        <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+          v0.2.0 정식 출시 후 한 줄 명령어로 설치할 수 있게 준비 중입니다.
+        </p>
+      </div>
+
+      <div class="mt-8 space-y-3">
+        <!-- winget -->
+        <div
+          class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
+                >Windows</span
+              >
+              <span
+                class="text-xs text-zinc-500 dark:text-zinc-500">· winget</span
+              >
+            </div>
+            <span
+              class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+              >v0.2.0 예정</span
+            >
+          </div>
+          <div class="relative">
+            <pre
+              class="overflow-x-auto bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100"
+              data-copy-source><code>winget install FlowAgent.FlowAgent</code></pre>
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-700"
+              data-copy-button
+              aria-label="명령어 복사"
+            >
+              복사
+            </button>
+          </div>
+        </div>
+
+        <!-- brew -->
+        <div
+          class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
+                >macOS</span
+              >
+              <span
+                class="text-xs text-zinc-500 dark:text-zinc-500">· Homebrew</span
+              >
+            </div>
+            <span
+              class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+              >v0.2.0 예정</span
+            >
+          </div>
+          <div class="relative">
+            <pre
+              class="overflow-x-auto bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100"
+              data-copy-source><code>brew install --cask flowagent</code></pre>
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-700"
+              data-copy-button
+              aria-label="명령어 복사"
+            >
+              복사
+            </button>
+          </div>
+        </div>
+
+        <!-- linux script -->
+        <div
+          class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+        >
+          <div
+            class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
+                >Linux</span
+              >
+              <span
+                class="text-xs text-zinc-500 dark:text-zinc-500">· install script</span
+              >
+            </div>
+            <span
+              class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+              >v0.2.0 예정</span
+            >
+          </div>
+          <div class="relative">
+            <pre
+              class="overflow-x-auto bg-zinc-950 px-4 py-3 font-mono text-sm text-zinc-100"
+              data-copy-source><code>curl -fsSL https://taskflow.kr/install.sh | bash</code></pre>
+            <button
+              type="button"
+              class="absolute right-2 top-2 rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-700"
+              data-copy-button
+              aria-label="명령어 복사"
+            >
+              복사
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────  DESKTOP APP WAITLIST  ─── -->
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-3xl px-4 py-14 text-center sm:px-6 sm:py-20">
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 dark:border-brand-900 dark:bg-brand-950/50 dark:text-brand-300"
+      >
+        v0.2.0 정식 출시 예정
+      </div>
+      <h2
+        class="mt-4 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        Desktop App (.msi installer)
+      </h2>
+      <p
+        class="mt-3 leading-relaxed text-zinc-600 dark:text-zinc-400"
+      >
+        한 번 설치, 자동 업데이트. start.bat 대신 시작 메뉴에서 클릭 한 번으로
+        실행되는 깨끗한 앱.<br />
+        약 1개월 뒤 출시 시 가장 먼저 알려드릴게요.
+      </p>
+      <div class="mt-8 flex justify-center">
+        <EmailForm
+          variant="inline"
+          source="download-msi-waitlist"
+          buttonText="출시 알림 받기"
+        />
+      </div>
+      <p class="mt-4 text-xs text-zinc-500 dark:text-zinc-500">
+        스팸 없음 · 출시 1회만 메일 발송 · 메일 주소만 사용
+      </p>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────  FROM SOURCE  ─── -->
+  <section>
+    <div class="mx-auto max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+      <h2
+        class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
+      >
+        소스에서 직접 빌드
+      </h2>
+      <p class="mt-3 text-zinc-600 dark:text-zinc-400">
+        코드 읽으며 쓰고 싶거나 zip 없이 최신 main 브랜치를 쓰고 싶다면.
+      </p>
+
+      <div
+        class="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+      >
+        <div
+          class="flex items-center justify-between border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800"
+        >
+          <span
+            class="font-mono text-xs text-zinc-500 dark:text-zinc-500"
+            >terminal</span
+          >
+          <a
+            href={REPO_URL}
+            rel="noopener"
+            class="inline-flex items-center gap-1 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+          >
+            GitHub ↗
+          </a>
+        </div>
+        <div class="relative">
+          <pre
+            class="overflow-x-auto bg-zinc-950 px-4 py-4 font-mono text-sm leading-relaxed text-zinc-100"
+            data-copy-source><code>git clone {REPO_GIT_URL}
+cd flowagent
+pnpm install
+pnpm dev</code></pre>
+          <button
+            type="button"
+            class="absolute right-2 top-2 rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-700"
+            data-copy-button
+            aria-label="명령어 복사"
+          >
+            복사
+          </button>
+        </div>
+      </div>
+
+      <p class="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
+        Node.js 18+ · pnpm 9+ 필요. 자세한 셋업 가이드는 <a
+          href="/docs"
+          class="underline-offset-4 hover:text-zinc-900 hover:underline dark:hover:text-zinc-100"
+          >문서</a
+        >를 참고하세요.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // ─── OS detection ──────────────────────────────────────────────
+  const ua = navigator.userAgent;
+  let os: 'windows' | 'mac' | 'linux' = 'windows';
+  if (/Macintosh|Mac OS X/.test(ua)) os = 'mac';
+  else if (/Linux/.test(ua) && !/Android/.test(ua)) os = 'linux';
+
+  const osLabel = { windows: 'Windows', mac: 'macOS', linux: 'Linux' }[os];
+  const ctaLabel = {
+    windows: 'Windows용 다운로드 (.zip)',
+    mac: 'macOS용 다운로드 (.zip)',
+    linux: 'Linux용 다운로드 (.zip)',
+  }[os];
+
+  document.querySelectorAll<HTMLElement>('[data-detected-name]').forEach((el) => {
+    el.textContent = osLabel;
+  });
+
+  const cta = document.querySelector<HTMLElement>('[data-cta-label]');
+  if (cta) cta.textContent = ctaLabel;
+
+  // Swap STEP 2 copy for non-Windows users — same .zip, different entrypoint.
+  if (os !== 'windows') {
+    const t = document.querySelector<HTMLElement>('[data-step-2-title]');
+    const d = document.querySelector<HTMLElement>('[data-step-2-desc]');
+    if (t) t.textContent = '터미널에서 pnpm dev';
+    if (d) d.textContent = 'cd flowagent → pnpm install && pnpm dev — 서버 시작.';
+  }
+
+  // ─── Copy buttons ──────────────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-button]').forEach((btn) => {
+    const source = btn.parentElement?.querySelector<HTMLElement>(
+      '[data-copy-source]'
+    );
+    if (!source) return;
+    const original = btn.textContent ?? '복사';
+
+    btn.addEventListener('click', async () => {
+      const text = source.textContent?.trim() ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✓ 복사됨';
+        btn.classList.add('bg-emerald-700');
+        btn.classList.remove('bg-zinc-800');
+      } catch {
+        btn.textContent = '복사 실패';
+        btn.classList.add('bg-red-700');
+        btn.classList.remove('bg-zinc-800');
+      } finally {
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('bg-emerald-700', 'bg-red-700');
+          btn.classList.add('bg-zinc-800');
+        }, 1500);
+      }
+    });
+  });
+</script>

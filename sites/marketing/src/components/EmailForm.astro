@@ -1,0 +1,123 @@
+---
+interface Props {
+  variant?: 'inline' | 'stacked';
+  buttonText?: string;
+  placeholder?: string;
+  source?: string;
+}
+
+const {
+  variant = 'inline',
+  buttonText = 'Pro 베타 알림 받기',
+  placeholder = 'you@example.com',
+  source = 'landing',
+} = Astro.props;
+
+// Replace this with the real Loops form endpoint when ready.
+// Format: https://app.loops.so/api/newsletter-form/<FORM_ID>
+const LOOPS_ENDPOINT = 'https://app.loops.so/api/newsletter-form/REPLACE_WITH_LOOPS_FORM_ID';
+---
+
+<div class="w-full max-w-md">
+  <form
+    class:list={[
+      'flex w-full gap-2',
+      variant === 'stacked' && 'flex-col sm:flex-row',
+    ]}
+    data-email-form
+    data-endpoint={LOOPS_ENDPOINT}
+    data-source={source}
+    data-original-button-text={buttonText}
+  >
+    <label class="sr-only" for={`email-${source}`}>이메일</label>
+    <input
+      id={`email-${source}`}
+      name="email"
+      type="email"
+      autocomplete="email"
+      required
+      placeholder={placeholder}
+      class="flex-1 rounded-md border border-zinc-300 bg-white px-3.5 py-2.5 text-sm shadow-sm placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder:text-zinc-500"
+    />
+    <button
+      type="submit"
+      class="inline-flex shrink-0 items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {buttonText}
+    </button>
+  </form>
+
+  <p
+    data-email-result
+    class="mt-2 hidden text-sm"
+    role="status"
+    aria-live="polite"
+  >
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll('[data-email-form]').forEach((form) => {
+    if (!(form instanceof HTMLFormElement)) return;
+
+    const endpoint = form.dataset.endpoint || '';
+    const originalButtonText = form.dataset.originalButtonText || '';
+    const button = form.querySelector<HTMLButtonElement>(
+      'button[type="submit"]'
+    );
+    const input = form.querySelector<HTMLInputElement>('input[name="email"]');
+    const result = form.parentElement?.querySelector<HTMLElement>(
+      '[data-email-result]'
+    );
+
+    if (!button || !input || !result) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      button.disabled = true;
+      button.textContent = '전송 중...';
+      result.className = 'mt-2 hidden text-sm';
+
+      const restoreButton = () => {
+        button.disabled = false;
+        button.textContent = originalButtonText;
+      };
+
+      const showSuccess = () => {
+        input.value = '';
+        result.textContent =
+          '신청 접수 완료. Pro 베타 오픈 시 메일로 알려드릴게요.';
+        result.className =
+          'mt-2 text-sm text-emerald-600 dark:text-emerald-400';
+      };
+
+      const showError = (msg: string) => {
+        result.textContent = msg;
+        result.className = 'mt-2 text-sm text-red-600 dark:text-red-400';
+      };
+
+      try {
+        // Phase 0: if endpoint still placeholder, simulate success.
+        if (endpoint.includes('REPLACE_WITH_LOOPS_FORM_ID')) {
+          await new Promise((r) => setTimeout(r, 400));
+          showSuccess();
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append('email', input.value);
+
+        const res = await fetch(endpoint, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showSuccess();
+      } catch (err) {
+        showError(
+          '전송 실패. 잠시 후 다시 시도하거나 wndnjs3865@naver.com 으로 알려주세요.'
+        );
+      } finally {
+        restoreButton();
+      }
+    });
+  });
+</script>
