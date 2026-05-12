@@ -13,9 +13,16 @@ const {
   source = 'landing',
 } = Astro.props;
 
-// Replace this with the real Loops form endpoint when ready.
-// Format: https://app.loops.so/api/newsletter-form/<FORM_ID>
-const LOOPS_ENDPOINT = 'https://app.loops.so/api/newsletter-form/REPLACE_WITH_LOOPS_FORM_ID';
+// Loops form ID is read from PUBLIC_LOOPS_FORM_ID env var.
+// To enable real submission: set this in Vercel Project Settings →
+// Environment Variables (Production + Preview + Development).
+//   Key:   PUBLIC_LOOPS_FORM_ID
+//   Value: <your Loops newsletter form ID> (e.g. abc12345-...)
+// Until set, the form simulates success client-side (Phase 0 default).
+const LOOPS_FORM_ID = import.meta.env.PUBLIC_LOOPS_FORM_ID ?? '';
+const LOOPS_ENDPOINT = LOOPS_FORM_ID
+  ? `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`
+  : '';
 ---
 
 <div class="w-full max-w-md">
@@ -98,8 +105,9 @@ const LOOPS_ENDPOINT = 'https://app.loops.so/api/newsletter-form/REPLACE_WITH_LO
       };
 
       try {
-        // Phase 0: if endpoint still placeholder, simulate success.
-        if (endpoint.includes('REPLACE_WITH_LOOPS_FORM_ID')) {
+        // Phase 0: if endpoint is empty (PUBLIC_LOOPS_FORM_ID unset),
+        // simulate success client-side so UX flow remains testable.
+        if (!endpoint) {
           await new Promise((r) => setTimeout(r, 400));
           showSuccess();
           return;

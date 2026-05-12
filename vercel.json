@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
   "buildCommand": "pnpm --filter @flowagent/marketing build",
   "outputDirectory": "sites/marketing/dist",
   "installCommand": "pnpm install --filter @flowagent/marketing... --frozen-lockfile",
