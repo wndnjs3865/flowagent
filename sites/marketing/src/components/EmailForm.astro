@@ -113,10 +113,16 @@ const LOOPS_ENDPOINT = LOOPS_FORM_ID
           return;
         }
 
-        const fd = new FormData();
-        fd.append('email', input.value);
+        // Loops newsletter-form endpoint expects URL-encoded body
+        // (multipart/form-data returns 400 "Please enter an email address.").
+        const body = new URLSearchParams();
+        body.append('email', input.value);
 
-        const res = await fetch(endpoint, { method: 'POST', body: fd });
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body,
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         showSuccess();
       } catch (err) {
