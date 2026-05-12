@@ -33,8 +33,7 @@
       "Bash(npm publish:*)"
     ],
     "deny": [
-      "Bash(rm -rf /)",
-      "Bash(:(){:|:&};:)"
+      "Bash(rm -rf /)"
     ]
   },
   "env": {}

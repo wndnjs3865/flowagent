@@ -52,7 +52,7 @@ if not exist .env (
   echo 2. 첫 줄 ANTHROPIC_API_KEY= 뒤에 본인 키를 붙여넣으세요.
   echo 3. Ctrl+S 로 저장한 뒤 메모장을 닫으면 자동으로 계속 진행됩니다.
   echo.
-  echo (API 키가 없으면: https://console.anthropic.com/settings/keys 에서 발급)
+  echo ^(API 키가 없으면: https://console.anthropic.com/settings/keys 에서 발급^)
   echo.
   pause
   start /wait notepad .env
