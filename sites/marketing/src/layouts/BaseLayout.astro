@@ -8,6 +8,8 @@ interface Props {
   description?: string;
   ogImage?: string;
   noIndex?: boolean;
+  /** Page-specific JSON-LD entries appended to the default @graph. */
+  structuredData?: object[];
 }
 
 const {
@@ -15,10 +17,39 @@ const {
   description = 'Your workflows are plain YAML files. Your data stays on your machine. 로컬에서 동작하는 AI 자동화 도구.',
   ogImage = '/og.png',
   noIndex = false,
+  structuredData = [],
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const fullOgImage = new URL(ogImage, Astro.site);
+
+// ─── Default JSON-LD: Organization + WebSite (always present) ──────────
+const defaultGraph = [
+  {
+    '@type': 'Organization',
+    '@id': 'https://taskflow.kr/#organization',
+    name: 'FlowAgent',
+    url: 'https://taskflow.kr',
+    logo: 'https://taskflow.kr/og.png',
+    description:
+      'Your workflows are plain YAML files. Your data stays on your machine.',
+    sameAs: ['https://github.com/wndnjs3865/flowagent'],
+  },
+  {
+    '@type': 'WebSite',
+    '@id': 'https://taskflow.kr/#website',
+    url: 'https://taskflow.kr',
+    name: 'FlowAgent',
+    description,
+    publisher: { '@id': 'https://taskflow.kr/#organization' },
+    inLanguage: 'ko-KR',
+  },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [...defaultGraph, ...structuredData],
+};
 ---
 
 <!doctype html>
@@ -60,6 +91,12 @@ const fullOgImage = new URL(ogImage, Astro.site);
       name="theme-color"
       content="#0a0a0a"
       media="(prefers-color-scheme: dark)"
+    />
+
+    <!-- JSON-LD structured data -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(jsonLd)}
     />
 
     <!-- Theme init (avoid FOUC) -->

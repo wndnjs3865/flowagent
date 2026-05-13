@@ -14,6 +14,54 @@ const ANNUAL_DISCOUNT_PCT = 20;
 
 const fmt = (n: number) => new Intl.NumberFormat('ko-KR').format(n);
 
+// ─── JSON-LD: Product + offers for each plan ───────────────────────────
+const productSchema = {
+  '@type': 'Product',
+  name: 'FlowAgent',
+  description:
+    '로컬-first AI 워크플로우 자동화. 워크플로우는 plain YAML 파일, 데이터는 사용자 컴퓨터에 저장.',
+  brand: { '@id': 'https://taskflow.kr/#organization' },
+  url: 'https://taskflow.kr/pricing',
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Free',
+      price: '0',
+      priceCurrency: 'KRW',
+      availability: 'https://schema.org/InStock',
+      description: '평생 무료. 워크플로우·실행 횟수 무제한.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: String(PRO_MONTHLY),
+      priceCurrency: 'KRW',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: PRO_MONTHLY,
+        priceCurrency: 'KRW',
+        unitText: 'MONTH',
+      },
+      availability: 'https://schema.org/PreOrder',
+      description: '3 기기 sync · 프리미엄 템플릿 · 이메일 우선 지원. 약 1개월 뒤 출시.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Team',
+      price: String(TEAM_MONTHLY),
+      priceCurrency: 'KRW',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: TEAM_MONTHLY,
+        priceCurrency: 'KRW',
+        unitText: 'MONTH',
+      },
+      availability: 'https://schema.org/PreOrder',
+      description: `시트당 가격. 최소 ${TEAM_MIN_SEATS}시트. 팀 워크스페이스 + 공유 워크플로우 + 감사 로그.`,
+    },
+  ],
+};
+
 // ─── Comparison matrix (§5의 매트릭스) ─────────────────────────────────
 type Cell = true | false | string;
 type Row = { label: string; cells: [Cell, Cell, Cell, Cell] };
@@ -80,6 +128,8 @@ const compareGroups: Group[] = [
 <BaseLayout
   title="가격 — FlowAgent"
   description="Free는 평생 무료. Pro 12,000원/월부터. 워크플로우 개수·실행 횟수에는 제한이 없어요. 결제는 여러 기기 sync와 팀 협업이 필요할 때부터."
+  ogImage="/og-pricing.png"
+  structuredData={[productSchema]}
 >
   <!-- ───────────────────────────────────────────────────────  HERO  ─── -->
   <section class="border-b border-zinc-200 dark:border-zinc-800">

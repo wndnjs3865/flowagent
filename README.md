@@ -1,12 +1,21 @@
-# flowagent
+# FlowAgent
 
-> 한 번 설정하면, 업무가 알아서 흐른다 — 반복 업무 스트레스를 줄이는 로컬 워크플로우 러너.
+> 🌐 **[https://taskflow.kr](https://taskflow.kr)** — 다운로드 · 가격 · 문서 · 템플릿
 
-Local-first workflow runner. Define a linear sequence of LLM and shell **Steps** in YAML, hit Run in the
-browser, watch results stream over SSE. Single-user, single-machine, no DAG, no queue.
+> **Your workflows are plain YAML files.**
+> **Your data stays on your machine.**
 
-Domain terms (`Workflow`, `Step`, `Run`, `Runner`, `Agent`) are defined in [`CONTEXT.md`](./CONTEXT.md). Use
-them verbatim in code, commits, and PR titles.
+[⬇ 다운로드](https://taskflow.kr/download) · [📖 문서](https://taskflow.kr/docs) · [💰 가격](https://taskflow.kr/pricing) · [🎯 템플릿](https://taskflow.kr/templates)
+
+반복 업무 스트레스를 줄이는 로컬 워크플로우 러너. LLM 호출과 셸 명령을 YAML 한 파일로 엮어 브라우저에서 실행하고, 결과를 SSE로 실시간 스트리밍합니다. 단일 사용자·단일 머신·DAG 없음·큐 없음.
+
+## 빠른 시작
+
+**권장**: [taskflow.kr/download](https://taskflow.kr/download)에서 zip 받기 → 압축 풀고 `start.bat` 더블클릭. Anthropic API 키만 입력하면 끝.
+
+**개발자**: `git clone https://github.com/wndnjs3865/flowagent.git && pnpm install && pnpm dev`
+
+도메인 용어 (`Workflow`, `Step`, `Run`, `Runner`, `Agent`) 는 [`CONTEXT.md`](./CONTEXT.md) 에 정의돼 있어요. 코드, 커밋, PR 제목에서 그대로 사용하세요.
 
 ---
 
