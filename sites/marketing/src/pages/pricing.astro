@@ -623,7 +623,12 @@ const compareGroups: Group[] = [
                   <tr class="border-t border-zinc-100 dark:border-zinc-800/60">
                     <th
                       scope="row"
-                      class="sticky left-0 z-10 bg-white px-4 py-3 text-left font-normal text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"
+                      class:list={[
+                        'sticky left-0 z-10 px-4 py-3 text-left font-normal',
+                        gIdx === 0
+                          ? 'bg-emerald-50/40 text-zinc-700 dark:bg-emerald-950/20 dark:text-zinc-300'
+                          : 'bg-white text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300',
+                      ]}
                       >{row.label}</th>
                     {row.cells.map((cell) => (
                       <td class="px-4 py-3 text-center text-zinc-700 dark:text-zinc-300">
