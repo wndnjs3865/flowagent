@@ -76,50 +76,50 @@ const compareGroups: Group[] = [
       { label: '로컬 데이터 저장', cells: [true, true, true, true] },
       { label: '오픈소스 (git clone)', cells: [true, true, true, true] },
       { label: 'API 키 본인 소유', cells: [true, true, true, true] },
-      { label: '자동 업데이트', cells: [true, true, true, '관리자 제어'] },
+      { label: '자동 업데이트', cells: [true, true, true, true] },
       { label: '기본 템플릿 갤러리', cells: [true, true, true, true] },
     ],
   },
   {
     category: 'Sync & 백업',
     rows: [
-      { label: 'Multi-device sync', cells: [false, '3 devices', '시트당', '무제한'] },
-      { label: 'Cloud run history backup', cells: [false, '90일', '1년', '무제한'] },
+      { label: 'Multi-device sync', cells: [false, '3 devices', '시트당', false] },
+      { label: 'Cloud run history backup', cells: [false, '90일', '1년', false] },
       { label: '설정 sync', cells: [false, true, true, true] },
-      { label: 'E2E 암호화', cells: [false, true, true, true] },
+      { label: 'E2E 암호화', cells: [false, true, true, false] },
     ],
   },
   {
     category: '팀 협업',
     rows: [
-      { label: 'Team workspace', cells: [false, false, true, true] },
-      { label: 'Shared workflows', cells: [false, false, true, true] },
-      { label: '권한 관리 (admin/member)', cells: [false, false, true, '커스텀 역할'] },
-      { label: '감사 로그 (audit)', cells: [false, false, '30일', '무제한 + export'] },
+      { label: 'Team workspace', cells: [false, false, true, false] },
+      { label: 'Shared workflows', cells: [false, false, true, false] },
+      { label: '권한 관리 (admin/member)', cells: [false, false, true, false] },
+      { label: '감사 로그 (audit)', cells: [false, false, '30일', false] },
     ],
   },
   {
     category: '템플릿 & API',
     rows: [
-      { label: '프리미엄 템플릿', cells: [false, '월 1-2개', true, '커스텀 가능'] },
-      { label: '팀 전용 템플릿', cells: [false, false, true, true] },
+      { label: '프리미엄 템플릿', cells: [false, '월 1-2개', true, '1대1 맞춤'] },
+      { label: '팀 전용 템플릿', cells: [false, false, true, false] },
       { label: '개인 API 토큰', cells: [false, true, true, true] },
     ],
   },
   {
     category: '엔터프라이즈',
     rows: [
-      { label: 'SSO / SAML', cells: [false, false, false, true] },
-      { label: '자체 호스팅 Sync 서버', cells: [false, false, '옵션', true] },
-      { label: 'Vault 연동 (사내 키 관리)', cells: [false, false, false, true] },
+      { label: 'SSO / SAML', cells: [false, false, false, false] },
+      { label: '자체 호스팅 Sync 서버', cells: [false, false, '옵션', false] },
+      { label: 'Vault 연동 (사내 키 관리)', cells: [false, false, false, false] },
       { label: '사업자 인보이스 / 세금계산서', cells: [false, true, true, true] },
     ],
   },
   {
     category: '지원',
     rows: [
-      { label: '지원 채널', cells: ['커뮤니티', 'Email 48h', 'Slack 24h', '전담 CSM'] },
-      { label: '온보딩 세션', cells: [false, false, '1회 무료', '맞춤 진행'] },
+      { label: '지원 채널', cells: ['커뮤니티', 'Email 48h', 'Slack 24h', '1대1 카톡 + 4주 운영'] },
+      { label: '온보딩 세션', cells: [false, false, '1회 무료', '30분 미팅 + 셋업'] },
     ],
   },
 ];
@@ -420,61 +420,58 @@ const compareGroups: Group[] = [
           </ul>
         </div>
 
-        <!-- ─── ENTERPRISE ─── -->
+        <!-- ─── PILOT ─── -->
         <div
           class="flex flex-col rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-900"
         >
           <div class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Enterprise
+            Pilot
           </div>
           <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
-            사내 보안 · 자체 호스팅
+            4주에 운영 들어가는 1대1 셋업
           </p>
           <div class="mt-5">
             <div class="flex items-baseline gap-1">
               <span
                 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
-                >문의</span
+                >₩500만</span
               >
+              <span class="text-sm text-zinc-500 dark:text-zinc-500">/4주</span>
             </div>
             <p class="mt-1 h-4 text-xs text-zinc-500 dark:text-zinc-500">
-              규모·요건에 맞춰 견적
+              귀사 데이터로 워크플로 1개 같이
             </p>
           </div>
           <a
-            href="mailto:wndnjs3865@naver.com?subject=FlowAgent%20Enterprise%20%EB%AC%B8%EC%9D%98"
-            class="mt-5 inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+            href="mailto:wndnjs3865@naver.com?subject=FlowAgent%20Pilot%20%EB%AF%B8%ED%8C%85%20%EC%8B%A0%EC%B2%AD"
+            class="mt-5 inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700"
           >
-            영업팀 문의
+            Pilot 미팅 신청하기
           </a>
           <ul class="mt-6 space-y-2.5 text-sm text-zinc-700 dark:text-zinc-300">
             <li class="flex items-start gap-2 font-medium text-zinc-900 dark:text-zinc-100">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              Team 모든 기능 +
+              Free의 모든 기능 +
             </li>
             <li class="flex items-start gap-2">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              SSO / SAML 인증
+              30분 미팅으로 귀사 데이터 캡처
             </li>
             <li class="flex items-start gap-2">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              자체 호스팅 Sync 서버
+              YAML 1개 1대1 설계
             </li>
             <li class="flex items-start gap-2">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              감사 로그 무제한 + export
+              4주 운영 지원 + 셋업 보장
             </li>
             <li class="flex items-start gap-2">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              Vault 연동 (사내 키 관리)
+              사업자 인보이스 / 세금계산서
             </li>
             <li class="flex items-start gap-2">
               <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              전담 CSM (Customer Success)
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd"/></svg>
-              맞춤 온보딩 + 분기 리뷰
+              완료 후 월 retainer 옵션 (₩50~150만)
             </li>
           </ul>
         </div>
@@ -543,16 +540,16 @@ const compareGroups: Group[] = [
           <div
             class="inline-flex rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 dark:bg-brand-950 dark:text-brand-300"
           >
-            → Enterprise · 직원 25명 + 보안팀이 막을 때
+            → Pilot · 시간이 없거나 보안 강할 때
           </div>
           <h3
             class="mt-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100"
           >
-            "사내 보안팀이 클라우드 sync 막음"
+            "직접 만들 시간이 없고, 데이터는 외부 못 줘"
           </h3>
           <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            자체 호스팅 sync 서버 + SSO + 감사 로그. 법무·보안 요건을 통과시켜야
-            할 때.
+            30분 미팅으로 귀사 데이터 캡처 → YAML 1개 같이 설계 → 4주 안에 운영. 회사 데이터는
+            미팅 후 노트북에만 남습니다.
           </p>
         </div>
       </div>
@@ -591,7 +588,7 @@ const compareGroups: Group[] = [
                 scope="col">Team</th>
               <th
                 class="px-4 py-3 text-center font-semibold text-zinc-900 dark:text-zinc-100"
-                scope="col">Enterprise</th>
+                scope="col">Pilot</th>
             </tr>
           </thead>
           <tbody>
