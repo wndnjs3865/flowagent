@@ -2,8 +2,8 @@
 
 > 🌐 **[https://taskflow.kr](https://taskflow.kr)** — 다운로드 · 가격 · 문서 · 템플릿
 
-> **Your workflows are plain YAML files.**
-> **Your data stays on your machine.**
+> **회사 데이터는 노트북 안에만.**
+> **한국어 사무 자동화, 5종 워크플로 바로 시작.**
 
 [⬇ 다운로드](https://taskflow.kr/download) · [📖 문서](https://taskflow.kr/docs) · [💰 가격](https://taskflow.kr/pricing) · [🎯 템플릿](https://taskflow.kr/templates)
 
