@@ -70,12 +70,12 @@ const variants = [
       <div>
         <div class="brand">${brandMark} FlowAgent</div>
         <h1 style="margin-top: 56px;">
-          Your workflows are<br />
-          <span class="accent">plain YAML files.</span><br />
-          Your data stays on your machine.
+          회사 데이터가<br />
+          <span class="accent">노트북 밖으로 안 나가는</span><br />
+          한국어 사무 자동화
         </h1>
         <p class="sub">
-          <strong>반복 업무 자동화</strong> · 로컬에서 100% 동작 · 평생 무료로 시작
+          <strong>회의록·매출·결재·문의·주간보고</strong> · 5종 워크플로 · 로컬 실행
         </p>
       </div>
       <div class="footer">
@@ -91,13 +91,13 @@ const variants = [
         <div class="brand">${brandMark} FlowAgent · 가격</div>
         <h1 style="margin-top: 48px;">
           <span class="accent">Free는 평생 무료.</span><br />
-          결제는 sync · 팀 공유부터.
+          결제는 sync · 팀 · Pilot부터.
         </h1>
         <div class="pillrow">
           <span class="pill"><span class="price">₩0</span> Free · 영구</span>
-          <span class="pill"><span class="price">₩12,000</span> Pro / 월</span>
-          <span class="pill"><span class="price">₩20,000</span> Team / 시트</span>
-          <span class="pill">Enterprise 문의</span>
+          <span class="pill"><span class="price">₩19,900</span> Pro / 월</span>
+          <span class="pill"><span class="price">₩9,900</span> Team / 시트</span>
+          <span class="pill"><span class="price">₩500만</span> Pilot / 4주</span>
         </div>
         <p class="sub" style="margin-top: 28px;">
           워크플로우 개수·실행 횟수 <strong>무제한</strong> · 한국 시장 사업자 인보이스
@@ -119,8 +119,8 @@ const variants = [
           1분이면 첫 워크플로우 실행.
         </h1>
         <p class="sub" style="margin-top: 32px;">
-          <strong>Windows · macOS · Linux</strong> · 가입 불필요 · 신용카드 불필요<br />
-          데이터는 100% 내 컴퓨터에
+          <strong>Windows 즉시 시작 · macOS·Linux 터미널</strong> · 가입 불필요 · 신용카드 불필요<br />
+          회사 데이터는 노트북 안에만
         </p>
       </div>
       <div class="footer">
