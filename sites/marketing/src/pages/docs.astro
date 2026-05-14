@@ -572,18 +572,26 @@ PORT=3001 pnpm dev</code></pre>
           <summary
             class="flex cursor-pointer items-center justify-between text-base font-medium text-zinc-900 dark:text-zinc-100"
           >
-            "포트 3000 충돌" — 이미 다른 서버 떠 있을 때
+            macOS/Linux에서도 쓸 수 있나요?
             <svg class="h-5 w-5 shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </summary>
           <div class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            <p>점유하고 있는 프로세스를 찾아 종료:</p>
-            <pre class="mt-2 overflow-x-auto rounded bg-zinc-950 p-3 font-mono text-xs text-zinc-100"><code># Windows
-netstat -ano | findstr :3000
-taskkill /PID &lt;PID&gt; /F
+            <p>
+              네. <code class="rounded bg-zinc-100 px-1 font-mono text-xs dark:bg-zinc-900">start.bat</code>은 Windows 더블클릭 진입용이고, macOS/Linux에서는 터미널에서 직접 실행하시면 됩니다.
+            </p>
+            <pre class="mt-2 overflow-x-auto rounded bg-zinc-950 p-3 font-mono text-xs text-zinc-100"><code># 1) 저장소 클론
+git clone https://github.com/wndnjs3865/flowagent.git
+cd flowagent
 
-# macOS / Linux
-lsof -i :3000
-kill -9 &lt;PID&gt;</code></pre>
+# 2) 의존성 설치 (pnpm 권장)
+pnpm install
+
+# 3) .env 설정 후 실행
+cp .env.example .env   # ANTHROPIC_API_KEY= 채우기
+pnpm dev               # http://localhost:3000</code></pre>
+            <p class="mt-2">
+              <code class="rounded bg-zinc-100 px-1 font-mono text-xs dark:bg-zinc-900">PORT=3001 pnpm dev</code>처럼 환경변수로 포트도 바꿀 수 있습니다.
+            </p>
           </div>
         </details>
       </div>
