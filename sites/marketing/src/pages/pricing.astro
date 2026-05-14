@@ -595,12 +595,32 @@ const compareGroups: Group[] = [
             </tr>
           </thead>
           <tbody>
-            {compareGroups.map((group) => (
+            {compareGroups.map((group, gIdx) => (
               <>
-                <tr class="border-t border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/50">
+                <tr
+                  class:list={[
+                    'border-t border-zinc-200 dark:border-zinc-800',
+                    gIdx === 0
+                      ? 'bg-emerald-50/40 dark:bg-emerald-950/20'
+                      : 'bg-zinc-50/50 dark:bg-zinc-900/50',
+                  ]}
+                >
                   <td
-                    class="sticky left-0 z-10 bg-zinc-50/50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:bg-zinc-900/50 dark:text-zinc-500"
-                    colspan="5">{group.category}</td>
+                    class:list={[
+                      'sticky left-0 z-10 px-4 py-2 text-xs font-semibold uppercase tracking-wider',
+                      gIdx === 0
+                        ? 'bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300'
+                        : 'bg-zinc-50/50 text-zinc-500 dark:bg-zinc-900/50 dark:text-zinc-500',
+                    ]}
+                    colspan="5"
+                  >
+                    {gIdx === 0 && (
+                      <span class="mr-2 inline-flex rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100">
+                        필수
+                      </span>
+                    )}
+                    {group.category}
+                  </td>
                 </tr>
                 {group.rows.map((row) => (
                   <tr class="border-t border-zinc-100 dark:border-zinc-800/60">
