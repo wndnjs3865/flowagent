@@ -145,6 +145,7 @@ Required env:
 | `FLOWAGENT_WORKFLOWS_DIR` | Directory scanned for `*.yaml` workflows (default `workflows`). |
 | `FLOWAGENT_RUNS_DIR` | Directory where per-run JSONL audit logs are written (default `runs`). Created on demand. |
 | `FLOWAGENT_PILOT_CONTACT_EMAIL` | Email used by the Listing page "Pilot 미팅 신청" CTA button. The server builds a `mailto:` link with a fixed Korean subject. Defaults to the FlowAgent official sales channel `wndnjs3865@naver.com` — override only if you fork for your own sales. |
+| `FLOWAGENT_SHARE_SECRET` | HMAC signing secret for `/share/*` URLs — used to send dashboard results to a phone (spec § 5 옵션 2). When unset, the share UI is hidden and `/share/*` routes return 503. Generate with `openssl rand -base64 32` (or any other long random string) and keep it in `.env`, never commit. |
 
 <a id="demo-video-1min"></a>
 

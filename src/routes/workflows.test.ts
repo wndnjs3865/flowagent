@@ -323,4 +323,156 @@ describe("workflow routes", () => {
     // Dashboard still loads cleanly with empty cards
     expect(body).toContain("최근 실행 없음");
   });
+
+  it("GET /executive shows the 📱 공유 button on filled cards when shareSecret is set", async () => {
+    const runId = "sales-summary-2026-05-20T00-00-00-000Z-share1";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T00:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "share-me" }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret-not-for-prod";
+    const app = createWorkflowRoutes(deps);
+
+    const res = await app.request("/executive");
+    const body = await res.text();
+    expect(body).toContain("📱 공유");
+    expect(body).toContain("/share/new?workflow=sales-summary");
+  });
+
+  it("GET /executive hides the share button when shareSecret is missing", async () => {
+    const runId = "sales-summary-2026-05-20T00-00-00-000Z-share2";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T00:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "share-me" }),
+      ].join("\n") + "\n",
+    );
+    const app = createWorkflowRoutes(makeDeps());
+
+    const res = await app.request("/executive");
+    const body = await res.text();
+    expect(body).not.toContain("📱 공유");
+  });
+
+  it("GET /share/new without shareSecret returns 503 with the disabled-page copy", async () => {
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/share/new?workflow=sales-summary");
+    expect(res.status).toBe(503);
+    const body = await res.text();
+    expect(body).toContain("FLOWAGENT_SHARE_SECRET");
+  });
+
+  it("GET /share/new without workflow query returns 400 with a helpful detail", async () => {
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret";
+    const app = createWorkflowRoutes(deps);
+
+    const res = await app.request("/share/new");
+    expect(res.status).toBe(400);
+    const body = await res.text();
+    expect(body).toContain("workflow 누락");
+  });
+
+  it("GET /share/new for a workflow with no runs returns 404", async () => {
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret";
+    const app = createWorkflowRoutes(deps);
+
+    const res = await app.request("/share/new?workflow=sales-summary");
+    expect(res.status).toBe(404);
+    const body = await res.text();
+    expect(body).toContain("공유할 실행 결과 없음");
+  });
+
+  it("GET /share/new for a workflow with a run redirects to /share/<token>", async () => {
+    const runId = "sales-summary-2026-05-20T00-00-00-000Z-new";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T00:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "shared" }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret";
+    const app = createWorkflowRoutes(deps);
+
+    const res = await app.request("/share/new?workflow=sales-summary");
+    expect(res.status).toBe(302);
+    const location = res.headers.get("location");
+    expect(location).toBeTruthy();
+    expect(location).toMatch(/^\/share\/v1\./);
+  });
+
+  it("GET /share/:token verifies + renders the share page with the run output", async () => {
+    const runId = "weekly-report-2026-05-20T08-00-00-000Z-tok";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "weekly-report",
+          runId,
+          startedAt: "2026-05-20T08:00:00.000Z",
+        }),
+        JSON.stringify({
+          kind: "step-output",
+          index: 0,
+          output: "EXEC SHARE PAYLOAD",
+        }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret";
+    const app = createWorkflowRoutes(deps);
+
+    // Generate a token by going through /share/new and following the redirect.
+    const newRes = await app.request("/share/new?workflow=weekly-report");
+    const location = newRes.headers.get("location");
+    if (!location) throw new Error("expected /share/new to redirect");
+
+    const tokenRes = await app.request(location);
+    expect(tokenRes.status).toBe(200);
+    const body = await tokenRes.text();
+    expect(body).toContain("EXEC SHARE PAYLOAD");
+    expect(body).toContain("주간 보고");
+    expect(body).toContain("공유 URL");
+  });
+
+  it("GET /share/:token returns 404 for a tampered token", async () => {
+    const deps = makeDeps();
+    deps.shareSecret = "test-secret";
+    const app = createWorkflowRoutes(deps);
+
+    const res = await app.request("/share/v1.bogusbody.bogussig");
+    expect(res.status).toBe(404);
+    const body = await res.text();
+    expect(body).toContain("만료됐거나 잘못됐어요");
+  });
+
+  it("GET /share/:token returns 503 when shareSecret is missing", async () => {
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/share/v1.something.something");
+    expect(res.status).toBe(503);
+  });
 });

@@ -73,6 +73,13 @@ function relativeTime(iso: string, now: Date = new Date()): string {
 
 export function ExecutiveDashboardPage(props: {
   runs: DashboardRun[];
+  /**
+   * Render the "📱 공유" button on cards that have a run. Disabled when
+   * FLOWAGENT_SHARE_SECRET is not set on the server (otherwise clicking the
+   * button would hit /share/new and get a 503 with the disabled-page copy —
+   * better to not show the button at all).
+   */
+  shareEnabled?: boolean;
   generatedAt?: Date;
 }) {
   const now = props.generatedAt ?? new Date();
@@ -138,34 +145,47 @@ export function ExecutiveDashboardPage(props: {
           }
 
           return (
-            <a
-              href={`/workflows/${slot.slug}`}
-              class="block rounded-xl border border-gray-200 bg-white p-5 hover:border-blue-400 hover:shadow-md transition group"
-            >
-              <div class="flex items-center gap-2">
-                <span aria-hidden="true" class="text-xl leading-none">
-                  {slot.icon}
-                </span>
-                <h2 class="text-base font-semibold text-gray-900 group-hover:text-blue-700">
-                  {slot.label}
-                </h2>
-                <span class="ml-auto text-xs text-gray-400 font-mono">
-                  {slot.slug}
-                </span>
-              </div>
-              <p class="mt-1 text-xs text-gray-500">{slot.context}</p>
-              <pre class="mt-3 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
-                {previewOutput(run.lastOutput)}
-              </pre>
-              <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <div class="rounded-xl border border-gray-200 bg-white p-5 hover:border-blue-400 hover:shadow-md transition">
+              <a href={`/workflows/${slot.slug}`} class="block group">
+                <div class="flex items-center gap-2">
+                  <span aria-hidden="true" class="text-xl leading-none">
+                    {slot.icon}
+                  </span>
+                  <h2 class="text-base font-semibold text-gray-900 group-hover:text-blue-700">
+                    {slot.label}
+                  </h2>
+                  <span class="ml-auto text-xs text-gray-400 font-mono">
+                    {slot.slug}
+                  </span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">{slot.context}</p>
+                <pre class="mt-3 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+                  {previewOutput(run.lastOutput)}
+                </pre>
+              </a>
+              <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
                 <span class="text-xs text-gray-500">
                   {relativeTime(run.startedAt, now)}
                 </span>
-                <span class="text-xs font-medium text-blue-600 group-hover:text-blue-700">
-                  전체 보기 →
-                </span>
+                <div class="flex items-center gap-3 text-xs">
+                  {props.shareEnabled ? (
+                    <a
+                      href={`/share/new?workflow=${encodeURIComponent(slot.slug)}`}
+                      class="inline-flex items-center gap-1 font-medium text-gray-600 hover:text-gray-900"
+                      title="1시간 만료 공유 링크 만들기"
+                    >
+                      📱 공유
+                    </a>
+                  ) : null}
+                  <a
+                    href={`/workflows/${slot.slug}`}
+                    class="font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    전체 보기 →
+                  </a>
+                </div>
               </div>
-            </a>
+            </div>
           );
         })}
       </div>
