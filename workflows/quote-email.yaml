@@ -1,0 +1,69 @@
+name: quote-email
+description: 프로젝트 brief와 본인 단가 가이드를 읽어 견적 항목·금액을 산정하고 고객 회신 메일 초안까지 만듭니다.
+persona: 자영업 B ★★★
+stressRelieved: 매번 비슷한 견적 메일 다시 쓰며 단가·일정·세금 조건 빠뜨리는 불안
+steps:
+  - type: shell
+    name: load-brief
+    command: |
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/project-brief-2026-w20.md','utf8'))"
+
+  - type: llm
+    name: build-quote
+    prompt: |
+      You are a Korean 1인 자영업/freelancer reviewing a project brief that
+      includes your own private unit-price guide. Produce a structured quote
+      using EXACTLY the prices and rules in the guide — do not invent numbers.
+
+      Output a Korean Markdown report with three sections:
+
+      1. **견적 항목별 표** — Markdown table with header:
+         | 항목 | 수량/시간 | 단가 | 합계 | 근거 (brief의 어떤 요구사항·단가 가이드의 어떤 줄을 참고했는지) |
+         Include every billable item the brief implies. Apply 긴급 할증 if the
+         deadline falls inside the guide's threshold.
+
+      2. **합계** — 항목 합계 + 부가세(10%) + 총액. 결제 조건도 한 줄(예: "시안 확정 50% / 최종 납품 50%, 세금계산서 발행").
+
+      3. **선택 옵션** — 견적에 포함하지 않았지만 고객이 원할 수 있는 항목
+         (예: 인쇄 입회). brief에 명시 없으면 "추가 시 +₩X"로 별도 제시.
+
+      Rules:
+      - 절대 단가 가이드에 없는 항목·단가를 만들지 말 것.
+      - 모든 숫자는 원화 + 천단위 콤마 (예: ₩1,200,000).
+      - Output in Korean only, no preamble, no closing remark.
+
+      ---
+      {{prev}}
+      ---
+
+  - type: shell
+    name: wrap-quote
+    command: |
+      node -e "process.stdout.write('=== 견적 산정 결과 (내부 검토용) ===\n' + {{prev}} + '\n=== 끝 ===\n')"
+
+  - type: llm
+    name: draft-email
+    prompt: |
+      Convert the quote breakdown below into a polite Korean reply email the
+      freelancer can send to the client (김대표). The client must understand
+      the price and conditions in one read; no internal jargon ("긴급 할증",
+      "근거" 등 단가 가이드 용어 노출 금지 — 결과만 자연어로).
+
+      Structure:
+      1. 인사 한 줄 + 빠른 회신 감사 한 줄 (예: "박매니저님 소개 감사드립니다 + 메일 잘 받았습니다").
+      2. 견적 표 — Markdown table:
+         | 항목 | 금액 |
+         (각 항목 한 줄 + 합계 한 줄 + 부가세 한 줄 + 총액 한 줄)
+      3. 일정 — 시안 1차·최종 납품 날짜를 brief의 일정 그대로 명시.
+      4. 결제 조건 — 시안 확정 50% / 최종 납품 50%, 세금계산서 발행.
+      5. 선택 옵션 한 줄 — "필요하시면 인쇄 입회는 ₩X 추가로 가능합니다" 식.
+      6. 마무리 한 줄 — "이 조건으로 진행 괜찮으시면 답신 부탁드립니다" + 본인 서명.
+
+      Tone: 친근하지만 전문적인 존댓말. 사과·하소연·자신감 부족 표현 금지
+      ("바쁘셔서", "혹시", "저렴하게" 등). 한 번 읽으면 결정 가능한 메일.
+
+      Output in Korean only, no preamble outside the greeting.
+
+      ---
+      {{prev}}
+      ---
