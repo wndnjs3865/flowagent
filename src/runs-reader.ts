@@ -10,6 +10,13 @@ import type { DashboardRun } from "./views/dashboard";
  * Files without a `run-start` first line (the pre-2026-05-20 format) are
  * silently skipped — they predate this metadata convention and don't
  * carry the workflow name anywhere in the file.
+ *
+ * TODO (P1, post-Pilot): full-directory scan on every dashboard/share
+ * request will not scale past a few thousand runs. Options when this hits:
+ *   - sort by mtime and slice to top-N (e.g. 100)
+ *   - in-memory cache invalidated by `runsDir` mtime
+ *   - maintain a tiny `runs/latest.json` index updated by the run route
+ * For the 3-Pilot launch target this O(n) cost is fine.
  */
 export function readRecentRuns(runsDir: string): DashboardRun[] {
   let files: string[];
@@ -89,4 +96,35 @@ function isStepOutputEvent(value: unknown): value is StepOutputEvent {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   return v.kind === "step-output" && typeof v.output === "string";
+}
+
+/**
+ * Filter `runs` by `workflow` slug and return the latest one by `startedAt`.
+ *
+ * Comparison is lexicographic on the ISO-8601 startedAt string. This is
+ * safe ONLY because `runner.ts` uses `new Date().toISOString()` which
+ * produces a fixed-format UTC string with millisecond precision (e.g.
+ * `2026-05-20T08:00:00.000Z`) — these compare correctly as strings.
+ * If anyone ever switches `runner.ts` to emit a different ISO variant
+ * (offset timezones, missing millis), this comparison silently picks
+ * wrong; update this helper at the same time.
+ *
+ * Used by both the executive dashboard (one call per slot) and the
+ * /share/new route (one call to find the latest run for a given slug).
+ * Centralized here so the comparison invariant lives in one place.
+ *
+ * NOTE: For the 3-Pilot launch target this O(n) per-call cost is fine.
+ * Past a few thousand runs, consider caching the result of `readRecentRuns`
+ * or maintaining a `runs/latest.json` index (see TODO in `readRecentRuns`).
+ */
+export function pickLatestRun(
+  runs: DashboardRun[],
+  workflow: string,
+): DashboardRun | undefined {
+  let best: DashboardRun | undefined;
+  for (const run of runs) {
+    if (run.workflowName !== workflow) continue;
+    if (!best || run.startedAt > best.startedAt) best = run;
+  }
+  return best;
 }

@@ -1,3 +1,4 @@
+import { pickLatestRun } from "../runs-reader";
 import { Layout } from "./layout";
 
 export type DashboardRun = {
@@ -45,18 +46,33 @@ const DASHBOARD_SLOTS: DashboardSlot[] = [
   },
 ];
 
-// Trim a long LLM output to a single-screen preview. Pick the first non-empty
-// paragraph + an ellipsis, capped at ~280 Korean chars (≈ a tweet's length).
+// Trim a long LLM output to a single-screen preview, capped at ~280 Korean
+// chars (≈ a tweet's length). Uses `Array.from` to slice by Unicode code
+// points instead of UTF-16 code units, so multi-unit characters like emoji
+// (🇰🇷, 👨‍👩‍👧) or supplementary-plane CJK (𠮷) don't get cut between
+// surrogate halves, which would render as ��. Not strict grapheme clusters
+// (that would require Intl.Segmenter and is overkill for a preview), but
+// covers the cases LLM output actually emits.
+const PREVIEW_LIMIT = 280;
+
 function previewOutput(text: string): string {
   const trimmed = text.trim();
   if (trimmed.length === 0) return "";
-  if (trimmed.length <= 280) return trimmed;
-  return trimmed.slice(0, 280) + "…";
+  const codePoints = Array.from(trimmed);
+  if (codePoints.length <= PREVIEW_LIMIT) return trimmed;
+  return codePoints.slice(0, PREVIEW_LIMIT).join("") + "…";
 }
 
 // Format ISO timestamp as a friendly Korean relative-time label.
 // "방금 전" (< 1m), "N분 전" (< 1h), "N시간 전" (< 24h), "N일 전" (< 7d),
 // otherwise ISO date.
+//
+// NOTE: Computed server-side at render time. For the default Pilot setup
+// (server and viewer on the same laptop) this is fine. For Cloud deployments
+// or if /executive ever gets cached at a proxy, the label can freeze at
+// cache time. The label is wrapped in a `<time datetime="...">` element
+// in the rendered JSX so browsers can show the underlying UTC timestamp as
+// a native tooltip even when the relative label is stale.
 function relativeTime(iso: string, now: Date = new Date()): string {
   const then = new Date(iso);
   if (Number.isNaN(then.getTime())) return iso;
@@ -83,14 +99,9 @@ export function ExecutiveDashboardPage(props: {
   generatedAt?: Date;
 }) {
   const now = props.generatedAt ?? new Date();
-  // Keep only the latest run per workflow (sorted by startedAt descending).
-  const latestByName = new Map<string, DashboardRun>();
-  for (const run of props.runs) {
-    const existing = latestByName.get(run.workflowName);
-    if (!existing || run.startedAt > existing.startedAt) {
-      latestByName.set(run.workflowName, run);
-    }
-  }
+  // Latest-run-per-slot is computed via the shared pickLatestRun helper.
+  // Each slot is independent so we just call it per slug — the cost is
+  // bounded by the 4-slot DASHBOARD_SLOTS constant, not the slot count.
 
   return (
     <Layout title="사장 대시보드">
@@ -114,7 +125,7 @@ export function ExecutiveDashboardPage(props: {
 
       <div class="grid gap-4 md:grid-cols-2">
         {DASHBOARD_SLOTS.map((slot) => {
-          const run = latestByName.get(slot.slug);
+          const run = pickLatestRun(props.runs, slot.slug);
           if (!run) {
             return (
               <div class="rounded-xl border border-dashed border-gray-300 bg-white p-5">
@@ -160,13 +171,17 @@ export function ExecutiveDashboardPage(props: {
                 </div>
                 <p class="mt-1 text-xs text-gray-500">{slot.context}</p>
                 <pre class="mt-3 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
-                  {previewOutput(run.lastOutput)}
+                  {previewOutput(run.lastOutput) || "(빈 결과)"}
                 </pre>
               </a>
               <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-3">
-                <span class="text-xs text-gray-500">
+                <time
+                  datetime={run.startedAt}
+                  class="text-xs text-gray-500"
+                  title={run.startedAt}
+                >
                   {relativeTime(run.startedAt, now)}
-                </span>
+                </time>
                 <div class="flex items-center gap-3 text-xs">
                   {props.shareEnabled ? (
                     <a

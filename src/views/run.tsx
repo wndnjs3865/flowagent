@@ -85,7 +85,9 @@ function buildClientScript(slug: string): string {
   });
 
   function renderEvent(evt) {
-    if (evt.kind === 'step-start') {
+    if (evt.kind === 'run-start') {
+      append('— starting workflow: ' + evt.workflowName);
+    } else if (evt.kind === 'step-start') {
       append('▶ step ' + evt.index + ' (' + evt.step.type + ') starting');
     } else if (evt.kind === 'step-output') {
       append('  output: ' + truncate(evt.output, 500));
@@ -94,7 +96,9 @@ function buildClientScript(slug: string): string {
     } else if (evt.kind === 'done') {
       append('— run complete (' + evt.runId + ')');
     } else {
-      append(JSON.stringify(evt));
+      // Future-proof: log unknown event kinds for debugging, but with a
+      // visible prefix so it's clear they're not part of the normal flow.
+      append('(unknown event) ' + JSON.stringify(evt));
     }
   }
 
