@@ -11,7 +11,7 @@ const templates = [
     slug: 'approval-triage',
     title: 'approval-triage',
     steps: 4,
-    category: '총무 / 사무관리',
+    category: '사무직 A ★★★ · 사장 D ★★',
     description:
       '결재함에 쌓인 요청을 자동승인·관리자 검토·정보 부족으로 분류하고 "오늘 처리할 결재" brief를 만듭니다.',
     burden: '결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하',
@@ -20,7 +20,7 @@ const templates = [
     slug: 'inquiry-triage',
     title: 'inquiry-triage',
     steps: 4,
-    category: 'CS팀 / 운영',
+    category: '자영업 B ★★★ · 사무직 A ★★',
     description:
       '오늘 접수된 한국어 고객 문의를 카테고리·긴급도로 분류하고 카테고리별 답변 초안까지 만듭니다.',
     burden: '매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로',
@@ -29,7 +29,7 @@ const templates = [
     slug: 'meeting-actions',
     title: 'meeting-actions',
     steps: 4,
-    category: '운영 / PM',
+    category: '사무직 A ★★★ · 사장 D ★★',
     description:
       '한국어 회의록에서 액션 아이템·담당자·마감일을 뽑아 Slack 보고 포맷으로 정리합니다.',
     burden: '회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하',
@@ -38,17 +38,17 @@ const templates = [
     slug: 'sales-summary',
     title: 'sales-summary',
     steps: 4,
-    category: '영업관리 / 대표 보고',
+    category: '사장 D ★★★ · 사무직 A ★★ · 자영업 B ★★',
     description: '월간 매출 CSV를 한국어 경영진 1-pager 리포트로 변환합니다.',
     burden: '월말마다 이상치 찾고 1-pager 만드는 압박',
   },
   {
-    slug: 'weekly-report-demo',
-    title: 'weekly-report-demo',
-    steps: 3,
-    category: '팀 리드 / 매니저',
+    slug: 'weekly-report',
+    title: 'weekly-report',
+    steps: 4,
+    category: '사무직 A ★★★ · 사장 D ★★',
     description:
-      '3-step demo — LLM으로 주간 요약 초안, shell로 가공, LLM으로 Slack용 다듬기.',
+      '한 주간 진행 보고서를 한국어로 정리하고 Slack 공유용 메시지까지 만듭니다.',
     burden: '매주 같은 보고서를 처음부터 다시 쓰는 30분',
   },
 ];

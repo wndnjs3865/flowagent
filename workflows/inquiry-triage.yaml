@@ -1,6 +1,6 @@
 name: inquiry-triage
 description: 오늘 접수된 한국어 고객 문의를 카테고리·긴급도로 분류하고 카테고리별 답변 초안까지 만듭니다.
-persona: CS팀 / 운영
+persona: 자영업 B ★★★ · 사무직 A ★★
 stressRelieved: 매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로
 steps:
   - type: shell
