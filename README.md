@@ -281,8 +281,8 @@ ls runs/*.jsonl 2>/dev/null | wc -l   # 0이면 OK, 아니면 mv runs runs.bak &
 
 ## Bundled workflows
 
-The `workflows/` directory ships six end-to-end workflows covering the most common Korean SMB office
-tasks plus the first of three B-persona (1인 자영업·프리랜서) additions. All use Korean fixtures under
+The `workflows/` directory ships seven end-to-end workflows covering the most common Korean SMB
+office tasks plus 2 of 3 B-persona (1인 자영업·프리랜서) additions. All use Korean fixtures under
 `workflows/fixtures/` and English LLM prompts that emit Korean output
 (see [`feedback_demo_fixture_language`](./CLAUDE.md) rule for why).
 
@@ -296,13 +296,13 @@ tasks plus the first of three B-persona (1인 자영업·프리랜서) additions
 | `inquiry-triage` | 고객 문의 CSV → 카테고리·긴급도 분류 + 카테고리별 답변 초안 | 자영업 B ★★★ · 사무직 A ★★ | 매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로 |
 | `approval-triage` | 결재 대기함 → 자동승인·검토·정보부족 분류 + 오늘의 brief | 사무직 A ★★★ · 사장 D ★★ | 결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하 |
 
-### B 페르소나 신규 3종 — 1/3 진행 중
+### B 페르소나 신규 3종 — 2/3 진행 중
 
 | Workflow | What it does | Persona (spec § 3) | 없애주는 반복 업무 스트레스 |
 |---|---|---|---|
 | `quote-email` | 프로젝트 brief + 본인 단가 가이드 → 견적 항목·금액 산정 → 고객 회신 메일 초안 | 자영업 B ★★★ | 매번 비슷한 견적 메일 다시 쓰며 단가·일정·세금 조건 빠뜨리는 불안 |
-| `sales-followup` *(Coming, ~2주)* | 고객 미팅·통화 노트 → 다음 액션 + follow-up 메일 + 일정 제안 | 자영업 B ★★★ | — |
-| `sns-replies` *(Coming, ~4주)* | 인스타·블로그 댓글 → 카테고리 분류 + 답글 초안 + 스팸 거름망 | 자영업 B ★★★ | — |
+| `sales-followup` | 고객 미팅·통화 raw 노트 → 다음 액션·약속·추가 견적 분리 + follow-up 메일 + 일정 제안 | 자영업 B ★★★ | 미팅 끝나고 머릿속 흩어진 액션·약속·다음 일정을 메모로 못 옮기는 부담 |
+| `sns-replies` *(Coming, ~2주)* | 인스타·블로그 댓글 → 카테고리 분류 + 답글 초안 + 스팸 거름망 | 자영업 B ★★★ | — |
 
 To adapt one for a real Pilot case, edit the file in `workflows/fixtures/` to the customer's own data —
 the YAML prompts stay the same. The customer's data never leaves their machine.
