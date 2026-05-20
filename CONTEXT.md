@@ -20,7 +20,11 @@ ADR-0001에서 채택한 ubiquitous-language glossary. 무겁게 시작하지 �
 **무엇이 포함되지 않나** (의도적):
 
 - step별 진행 상황 — 그건 실시간 스트리밍(SSE)으로만 보여주고, 결과에는 최종본만 남음
-- 성공/실패 여부 — 현재 디스크 포맷에 명시 안 됨. 필요해지면 추가
+- 성공/실패 플래그 — Result 타입 안에는 없다. 대신 **reader(`src/results.ts`)가 완료되고 성공한 실행만 Result로 반환**한다. 실패한 실행과 in-flight 실행은 대시보드/공유에 노출되지 않는다. 향후 "최근 실패도 보고 싶다" 같은 요구가 생기면 별도 query (`getLatestIncludingFailed` 등)로 추가.
+
+**deferred** (YAGNI):
+
+- `ResultDetail` (step별 출력 포함된 무거운 projection) — grilling 단계에서 "둘 다 제공" 합의했지만 현재 caller가 없음. 첫 caller(결과 상세 페이지 등) 등장 시 추가.
 
 **어디에 보이나**:
 
