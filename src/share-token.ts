@@ -19,12 +19,28 @@ const TOKEN_VERSION = "v1";
 /** Default lifetime — spec § 5 옵션 2: "서명 토큰 URL (만료 1시간)". */
 export const DEFAULT_TTL_MS = 60 * 60 * 1000;
 
+/**
+ * Minimum secret length in raw characters. 32 bytes is the conventional
+ * floor for HMAC-SHA256 keys — a shorter secret is brute-forceable offline
+ * given one valid token (the token appears in browser history, server logs,
+ * the recipient's chat history, etc.). README + `.env.example` already
+ * recommend `openssl rand -base64 32` which produces ~44 chars, so 32 is a
+ * permissive floor.
+ */
+const MIN_SECRET_LENGTH = 32;
+
 export function generateShareToken(
   payload: SharePayload,
   secret: string,
 ): string {
   if (secret.length === 0) {
     throw new Error("share token secret must not be empty");
+  }
+  if (secret.length < MIN_SECRET_LENGTH) {
+    throw new Error(
+      `share token secret must be at least ${MIN_SECRET_LENGTH} characters ` +
+        `(got ${secret.length}). Generate one with: openssl rand -base64 32`,
+    );
   }
   const body = encodeBase64Url(
     Buffer.from(JSON.stringify(payload), "utf8"),

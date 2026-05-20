@@ -3,17 +3,14 @@ import { join } from "node:path";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { generateRunId, runWorkflow, type StepRunners } from "../runner";
-import { readRecentRuns } from "../runs-reader";
+import { pickLatestRun, readRecentRuns } from "../runs-reader";
 import {
   DEFAULT_TTL_MS,
   generateShareToken,
   verifyShareToken,
 } from "../share-token";
 import { loadWorkflow } from "../spec";
-import {
-  ExecutiveDashboardPage,
-  type DashboardRun,
-} from "../views/dashboard";
+import { ExecutiveDashboardPage } from "../views/dashboard";
 import { ErrorPage } from "../views/error";
 import { WorkflowListPage } from "../views/index";
 import { WorkflowRunPage } from "../views/run";
@@ -36,10 +33,18 @@ export type WorkflowRoutesDeps = {
   /**
    * HMAC signing secret for `/share/*` URLs (spec § 5 옵션 2 — 사장이 폰으로
    * 결과 보기). When undefined, the share routes show a "공유 기능 비활성화"
-   * page instead of a token. Set via FLOWAGENT_SHARE_SECRET — must be long and
-   * random (e.g. `openssl rand -base64 32`).
+   * page instead of a token. Set via FLOWAGENT_SHARE_SECRET — must be at
+   * least 32 characters (`openssl rand -base64 32`).
    */
   shareSecret?: string;
+  /**
+   * Optional public origin (e.g. `https://flowagent.example.com`) used when
+   * building share URLs. When unset, x-forwarded-proto/x-forwarded-host
+   * headers are honored if present, falling back to the request URL itself.
+   * Useful behind a reverse proxy (nginx, Cloudflare) where the Node server
+   * sees `localhost` but the user-facing URL is the public domain.
+   */
+  publicOrigin?: string;
 };
 
 // Official FlowAgent sales channel (사업자등록번호 607-20-94796). General users
@@ -96,7 +101,7 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
       );
     }
     const runs = readRecentRuns(deps.runsDir);
-    const latest = pickLatest(runs, workflow);
+    const latest = pickLatestRun(runs, workflow);
     if (!latest) {
       return c.html(
         ErrorPage({
@@ -155,8 +160,8 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
       lastOutput: run.lastOutput,
       expiresAt: payload.expiresAt,
     };
-    const url = new URL(c.req.url);
-    const shareUrl = `${url.origin}/share/${token}`;
+    const origin = resolvePublicOrigin(c, deps.publicOrigin);
+    const shareUrl = `${origin}/share/${token}`;
     return c.html(ShareResultPage({ run: shareRun, shareUrl }));
   });
 
@@ -236,14 +241,28 @@ function findEntry(dir: string, name: string): WorkflowEntry | undefined {
   return listWorkflows(dir).find((w) => w.name === name);
 }
 
-function pickLatest(
-  runs: DashboardRun[],
-  workflow: string,
-): DashboardRun | undefined {
-  let best: DashboardRun | undefined;
-  for (const run of runs) {
-    if (run.workflowName !== workflow) continue;
-    if (!best || run.startedAt > best.startedAt) best = run;
+/**
+ * Resolve the user-facing origin for share URLs. Priority:
+ *   1. Explicit `publicOrigin` dep (FLOWAGENT_PUBLIC_ORIGIN env var)
+ *   2. `x-forwarded-proto` + `x-forwarded-host` headers (reverse proxy)
+ *   3. The request's own URL (single-server case, also Node listening on
+ *      0.0.0.0 with a public hostname)
+ *
+ * The proxy-header path is conservative: it requires BOTH headers to be
+ * present, since trusting only one can cause scheme/host mismatch.
+ */
+type RequestLike = {
+  req: { url: string; header: (name: string) => string | undefined };
+};
+
+function resolvePublicOrigin(c: RequestLike, override?: string): string {
+  if (override && override.length > 0) {
+    return override.replace(/\/$/, "");
   }
-  return best;
+  const fwdProto = c.req.header("x-forwarded-proto");
+  const fwdHost = c.req.header("x-forwarded-host");
+  if (fwdProto && fwdHost) {
+    return `${fwdProto}://${fwdHost}`;
+  }
+  return new URL(c.req.url).origin;
 }

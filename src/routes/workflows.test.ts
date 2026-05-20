@@ -339,7 +339,7 @@ describe("workflow routes", () => {
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
-    deps.shareSecret = "test-secret-not-for-prod";
+    deps.shareSecret = "test-secret-not-for-prod-pad-32x";
     const app = createWorkflowRoutes(deps);
 
     const res = await app.request("/executive");
@@ -379,7 +379,7 @@ describe("workflow routes", () => {
 
   it("GET /share/new without workflow query returns 400 with a helpful detail", async () => {
     const deps = makeDeps();
-    deps.shareSecret = "test-secret";
+    deps.shareSecret = "test-secret-pad-to-32-chars-12345";
     const app = createWorkflowRoutes(deps);
 
     const res = await app.request("/share/new");
@@ -390,7 +390,7 @@ describe("workflow routes", () => {
 
   it("GET /share/new for a workflow with no runs returns 404", async () => {
     const deps = makeDeps();
-    deps.shareSecret = "test-secret";
+    deps.shareSecret = "test-secret-pad-to-32-chars-12345";
     const app = createWorkflowRoutes(deps);
 
     const res = await app.request("/share/new?workflow=sales-summary");
@@ -414,7 +414,7 @@ describe("workflow routes", () => {
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
-    deps.shareSecret = "test-secret";
+    deps.shareSecret = "test-secret-pad-to-32-chars-12345";
     const app = createWorkflowRoutes(deps);
 
     const res = await app.request("/share/new?workflow=sales-summary");
@@ -443,7 +443,7 @@ describe("workflow routes", () => {
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
-    deps.shareSecret = "test-secret";
+    deps.shareSecret = "test-secret-pad-to-32-chars-12345";
     const app = createWorkflowRoutes(deps);
 
     // Generate a token by going through /share/new and following the redirect.
@@ -461,7 +461,7 @@ describe("workflow routes", () => {
 
   it("GET /share/:token returns 404 for a tampered token", async () => {
     const deps = makeDeps();
-    deps.shareSecret = "test-secret";
+    deps.shareSecret = "test-secret-pad-to-32-chars-12345";
     const app = createWorkflowRoutes(deps);
 
     const res = await app.request("/share/v1.bogusbody.bogussig");
@@ -474,5 +474,188 @@ describe("workflow routes", () => {
     const app = createWorkflowRoutes(makeDeps());
     const res = await app.request("/share/v1.something.something");
     expect(res.status).toBe(503);
+  });
+
+  it("GET /share/:token returns 404 with generic copy for a token whose run was deleted", async () => {
+    // Generate a valid token first (with a real run on disk), then delete the
+    // jsonl. The token is still cryptographically valid but the lookup misses.
+    // Pin the current behavior so a future refactor doesn't silently change
+    // the user-visible error or accidentally leak info.
+    const runId = "sales-summary-2026-05-20T05-00-00-000Z-gone";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T05:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "soon-gone" }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "x".repeat(40); // satisfies min-length
+    const app = createWorkflowRoutes(deps);
+
+    const newRes = await app.request("/share/new?workflow=sales-summary");
+    const location = newRes.headers.get("location");
+    if (!location) throw new Error("expected redirect");
+
+    // Now delete the run before the recipient opens the link.
+    rmSync(join(runsDir, `${runId}.jsonl`));
+
+    const tokenRes = await app.request(location);
+    expect(tokenRes.status).toBe(404);
+    const body = await tokenRes.text();
+    // Generic copy — distinct from tampered-token message intentionally,
+    // since "run gone after token issued" is a legitimate-user case
+    // (not an attack signal).
+    expect(body).toContain("실행 결과를 찾을 수 없어요");
+  });
+
+  it("GET /share/:token returns 404 for an expired token (end-to-end through router)", async () => {
+    // Construct a valid token with a past expiry directly via the helper.
+    // /share/new always uses DEFAULT_TTL_MS so we can't exercise the expired
+    // path through it without time-travel. This guards against a future
+    // refactor that accidentally renders the page despite verifyShareToken
+    // returning null.
+    const { generateShareToken } = await import("../share-token");
+    const runId = "weekly-report-2026-05-20T06-00-00-000Z-exp";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "weekly-report",
+          runId,
+          startedAt: "2026-05-20T06:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "expired" }),
+      ].join("\n") + "\n",
+    );
+    const secret = "y".repeat(40);
+    const deps = makeDeps();
+    deps.shareSecret = secret;
+    const app = createWorkflowRoutes(deps);
+
+    const expiredToken = generateShareToken(
+      {
+        workflow: "weekly-report",
+        runId,
+        expiresAt: Date.now() - 1000, // 1 second in the past
+      },
+      secret,
+    );
+
+    const res = await app.request(`/share/${expiredToken}`);
+    expect(res.status).toBe(404);
+    const body = await res.text();
+    expect(body).toContain("만료됐거나 잘못됐어요");
+  });
+
+  it("GET /share/:token uses publicOrigin override when set, instead of c.req.url origin", async () => {
+    const runId = "sales-summary-2026-05-20T07-00-00-000Z-pub";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T07:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "via-proxy" }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "z".repeat(40);
+    deps.publicOrigin = "https://flowagent.example.com";
+    const app = createWorkflowRoutes(deps);
+
+    const newRes = await app.request("/share/new?workflow=sales-summary");
+    const location = newRes.headers.get("location");
+    if (!location) throw new Error("expected redirect");
+
+    const tokenRes = await app.request(location);
+    const body = await tokenRes.text();
+    // The Share Result page renders the full share URL in a copy box; it
+    // should use the public origin, not the test request origin.
+    expect(body).toContain("https://flowagent.example.com/share/");
+    expect(body).not.toContain("http://localhost/share/");
+  });
+
+  it("GET /share/:token honors x-forwarded-* headers when publicOrigin is not set", async () => {
+    const runId = "approval-triage-2026-05-20T08-00-00-000Z-fwd";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "approval-triage",
+          runId,
+          startedAt: "2026-05-20T08:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "fwd" }),
+      ].join("\n") + "\n",
+    );
+    const deps = makeDeps();
+    deps.shareSecret = "a".repeat(40);
+    const app = createWorkflowRoutes(deps);
+
+    const newRes = await app.request("/share/new?workflow=approval-triage");
+    const location = newRes.headers.get("location");
+    if (!location) throw new Error("expected redirect");
+
+    const tokenRes = await app.request(location, {
+      headers: {
+        "x-forwarded-proto": "https",
+        "x-forwarded-host": "proxied.example.com",
+      },
+    });
+    const body = await tokenRes.text();
+    expect(body).toContain("https://proxied.example.com/share/");
+  });
+
+  it("GET / renders a quick-access card linking to /executive", async () => {
+    const app = createWorkflowRoutes(makeDeps());
+
+    const res = await app.request("/");
+    const body = await res.text();
+
+    expect(body).toContain("사장 대시보드");
+    expect(body).toMatch(/href="\/executive"/);
+  });
+
+  it("GET /executive renders \"(빈 결과)\" placeholder when a run has empty lastOutput", async () => {
+    // A run that finished with no step-output between run-start and done.
+    const runId = "sales-summary-2026-05-20T09-00-00-000Z-empty";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T09:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "done", runId }),
+      ].join("\n") + "\n",
+    );
+    const app = createWorkflowRoutes(makeDeps());
+
+    const res = await app.request("/executive");
+    const body = await res.text();
+    expect(body).toContain("(빈 결과)");
+  });
+
+  it("GET /workflows/:name run page client script handles run-start with a friendly label", async () => {
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/workflows/demo");
+    const body = await res.text();
+    // The inline client script must recognize the new run-start event kind
+    // so the run log doesn't begin with a raw JSON dump.
+    expect(body).toContain("'run-start'");
+    expect(body).toContain("starting workflow");
   });
 });

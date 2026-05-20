@@ -114,6 +114,30 @@ export function WorkflowListPage(props: {
         </p>
       </header>
 
+      {/* Executive dashboard quick access — D persona daily landing.
+          Placed above the Pilot CTA so a returning CEO doesn't have to scroll
+          past the workflow list to find their daily summary. */}
+      <section class="mb-4">
+        <a
+          href="/executive"
+          class="block rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 hover:border-emerald-300 hover:bg-emerald-100 transition"
+        >
+          <div class="flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="font-semibold text-emerald-900">
+                📊 사장 대시보드
+              </p>
+              <p class="mt-0.5 text-sm text-emerald-800">
+                매출 · 결재 · 문의 · 주간 진행 4 워크플로 최근 결과를 한 페이지에서 (모바일 반응형).
+              </p>
+            </div>
+            <span class="shrink-0 text-sm font-medium text-emerald-700">
+              열기 →
+            </span>
+          </div>
+        </a>
+      </section>
+
       {/* Pilot CTA banner */}
       <section class="mb-6 rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 flex items-start gap-4">
         <span aria-hidden="true" class="text-2xl leading-none">🤝</span>

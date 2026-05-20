@@ -7,7 +7,10 @@ import {
   type SharePayload,
 } from "./share-token";
 
-const SECRET = "test-secret-do-not-use-in-prod";
+// Long enough to satisfy the production min-length (32 chars). Tests that
+// specifically exercise the short-secret rejection path use shorter strings
+// locally — see "throws when secret is shorter than 32 chars".
+const SECRET = "test-secret-do-not-use-in-prod-pad-x";
 
 function makePayload(overrides?: Partial<SharePayload>): SharePayload {
   return {
@@ -101,6 +104,21 @@ describe("generateShareToken / verifyShareToken", () => {
 
   it("generateShareToken throws on empty secret", () => {
     expect(() => generateShareToken(makePayload(), "")).toThrow();
+  });
+
+  it("generateShareToken throws when secret is shorter than 32 chars", () => {
+    expect(() => generateShareToken(makePayload(), "short")).toThrow(
+      /at least 32 characters/,
+    );
+    expect(() =>
+      generateShareToken(makePayload(), "x".repeat(31)),
+    ).toThrow(/at least 32 characters/);
+  });
+
+  it("generateShareToken accepts secret of exactly 32 chars", () => {
+    expect(() =>
+      generateShareToken(makePayload(), "x".repeat(32)),
+    ).not.toThrow();
   });
 
   it("verifyShareToken returns null on empty secret (does not throw — keeps disabled path clean)", () => {

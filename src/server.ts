@@ -8,6 +8,9 @@ const pilotContactEmail = process.env.FLOWAGENT_PILOT_CONTACT_EMAIL;
 // to a phone via signed URLs. If unset, the share UI is hidden and the
 // /share/* routes return 503 with an instruction page.
 const shareSecret = process.env.FLOWAGENT_SHARE_SECRET;
+// Optional — used to build user-facing share URLs behind a reverse proxy.
+// See WorkflowRoutesDeps.publicOrigin for the full precedence rules.
+const publicOrigin = process.env.FLOWAGENT_PUBLIC_ORIGIN;
 
 export const app = createWorkflowRoutes({
   workflowsDir,
@@ -15,4 +18,5 @@ export const app = createWorkflowRoutes({
   runners: createDefaultRunners(),
   pilotContactEmail,
   shareSecret,
+  publicOrigin,
 });
