@@ -10,6 +10,7 @@ export type StepRunners = {
 };
 
 export type RunEvent =
+  | { kind: "run-start"; workflowName: string; runId: string; startedAt: string }
   | { kind: "step-start"; index: number; step: Step }
   | { kind: "step-output"; index: number; output: string }
   | { kind: "step-end"; index: number; ok: boolean; error?: string }
@@ -46,6 +47,17 @@ export async function runWorkflow(
   const runId = options.runId ?? generateRunId();
   let prev = "";
   let ok = true;
+
+  // First event: write run metadata to the JSONL log so /executive dashboard
+  // can map jsonl files → workflows without parsing step contents (which can
+  // collide across workflows, e.g. meeting-actions + sales-followup both have
+  // a "load-notes" first step).
+  await onEvent({
+    kind: "run-start",
+    workflowName: spec.name,
+    runId,
+    startedAt: new Date().toISOString(),
+  });
 
   for (const [index, step] of spec.steps.entries()) {
     await onEvent({ kind: "step-start", index, step });

@@ -25,11 +25,35 @@ describe("runWorkflow", () => {
     expect(result.ok).toBe(true);
     expect(result.runId.length).toBeGreaterThan(0);
     expect(events.map((e) => e.kind)).toEqual([
+      "run-start",
       "step-start",
       "step-output",
       "step-end",
       "done",
     ]);
+  });
+
+  it("emits run-start as the first event with workflowName, runId, and ISO startedAt", async () => {
+    const wf: Workflow = {
+      name: "metadata-emitter",
+      steps: [{ type: "llm", prompt: "x" }],
+    };
+    const events: RunEvent[] = [];
+
+    const result = await runWorkflow(wf, (e) => {
+      events.push(e);
+    }, makeRunners());
+
+    const first = events[0];
+    expect(first?.kind).toBe("run-start");
+    if (first?.kind === "run-start") {
+      expect(first.workflowName).toBe("metadata-emitter");
+      expect(first.runId).toBe(result.runId);
+      // ISO timestamp shape — full precision (yyyy-mm-ddThh:mm:ss.sssZ)
+      expect(first.startedAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      );
+    }
   });
 
   it("runs multi-step workflow with ascending indices and terminates with done", async () => {

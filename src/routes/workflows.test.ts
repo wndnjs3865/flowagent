@@ -203,15 +203,124 @@ describe("workflow routes", () => {
       .split("\n");
     const events = lines.map((l) => JSON.parse(l));
 
-    // Sequence for 2-step workflow: start-out-end × 2 + done = 7 events
-    expect(events).toHaveLength(7);
-    expect(events[0]).toMatchObject({ kind: "step-start", index: 0 });
-    expect(events[1]).toMatchObject({ kind: "step-output", index: 0 });
-    expect(events[2]).toMatchObject({ kind: "step-end", index: 0, ok: true });
-    expect(events[3]).toMatchObject({ kind: "step-start", index: 1 });
-    expect(events[6]).toMatchObject({ kind: "done" });
+    // Sequence for 2-step workflow: run-start meta + (start-out-end × 2) + done = 8 events
+    expect(events).toHaveLength(8);
+    expect(events[0]).toMatchObject({
+      kind: "run-start",
+      workflowName: "demo",
+    });
+    expect(events[1]).toMatchObject({ kind: "step-start", index: 0 });
+    expect(events[2]).toMatchObject({ kind: "step-output", index: 0 });
+    expect(events[3]).toMatchObject({ kind: "step-end", index: 0, ok: true });
+    expect(events[4]).toMatchObject({ kind: "step-start", index: 1 });
+    expect(events[7]).toMatchObject({ kind: "done" });
 
     // file basename must equal the runId reported by the runner
-    expect(events[6].runId).toBe(baseName);
+    expect(events[7].runId).toBe(baseName);
+    // run-start meta must also carry the same runId so dashboard scans match.
+    expect(events[0].runId).toBe(baseName);
+  });
+
+  it("GET /executive renders empty-state cards when runs/ is empty", async () => {
+    const app = createWorkflowRoutes(makeDeps());
+
+    const res = await app.request("/executive");
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toMatch(/text\/html/);
+    const body = await res.text();
+    expect(body).toContain("사장 대시보드");
+    // All 4 dashboard slots present
+    expect(body).toContain("sales-summary");
+    expect(body).toContain("approval-triage");
+    expect(body).toContain("inquiry-triage");
+    expect(body).toContain("weekly-report");
+    // Empty state copy
+    expect(body).toContain("최근 실행 없음");
+    expect(body).toContain("지금 실행 →");
+  });
+
+  it("GET /executive shows the latest run output for each dashboard workflow", async () => {
+    // Seed runs/ with a sales-summary jsonl that the dashboard should pick up.
+    const runId = "sales-summary-2026-05-20T00-00-00-000Z-abc123";
+    const lines = [
+      JSON.stringify({
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId,
+        startedAt: "2026-05-20T00:00:00.000Z",
+      }),
+      JSON.stringify({ kind: "step-start", index: 0, step: { type: "shell", command: "load" } }),
+      JSON.stringify({ kind: "step-output", index: 0, output: "raw csv" }),
+      JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+      JSON.stringify({ kind: "step-start", index: 1, step: { type: "llm", prompt: "summarize" } }),
+      JSON.stringify({
+        kind: "step-output",
+        index: 1,
+        output: "전월 대비 매출 12% 감소했습니다.",
+      }),
+      JSON.stringify({ kind: "step-end", index: 1, ok: true }),
+      JSON.stringify({ kind: "done", runId }),
+    ];
+    writeFileSync(join(runsDir, `${runId}.jsonl`), lines.join("\n") + "\n");
+
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/executive");
+    const body = await res.text();
+
+    expect(body).toContain("전월 대비 매출 12% 감소했습니다.");
+    // Other 3 cards still show empty state
+    expect(body).toContain("최근 실행 없음");
+  });
+
+  it("GET /executive picks the latest run per workflow when multiple runs exist for the same slug", async () => {
+    function writeRun(runId: string, startedAt: string, output: string) {
+      const lines = [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "approval-triage",
+          runId,
+          startedAt,
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output }),
+        JSON.stringify({ kind: "done", runId }),
+      ];
+      writeFileSync(join(runsDir, `${runId}.jsonl`), lines.join("\n") + "\n");
+    }
+    writeRun(
+      "approval-triage-2026-05-19T10-00-00-000Z-aaa",
+      "2026-05-19T10:00:00.000Z",
+      "OLDER OUTPUT",
+    );
+    writeRun(
+      "approval-triage-2026-05-20T11-00-00-000Z-bbb",
+      "2026-05-20T11:00:00.000Z",
+      "LATEST OUTPUT",
+    );
+
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/executive");
+    const body = await res.text();
+
+    expect(body).toContain("LATEST OUTPUT");
+    expect(body).not.toContain("OLDER OUTPUT");
+  });
+
+  it("GET /executive ignores pre-meta-format jsonl files (no run-start first line)", async () => {
+    // Old-format file — first line is a step-start, no run-start meta.
+    const oldFormat = [
+      JSON.stringify({ kind: "step-start", index: 0, step: { type: "llm", prompt: "x" } }),
+      JSON.stringify({ kind: "step-output", index: 0, output: "DO NOT SHOW" }),
+      JSON.stringify({ kind: "done", runId: "old-format" }),
+    ];
+    writeFileSync(join(runsDir, "old-format.jsonl"), oldFormat.join("\n") + "\n");
+
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/executive");
+    const body = await res.text();
+
+    expect(body).not.toContain("DO NOT SHOW");
+    // Dashboard still loads cleanly with empty cards
+    expect(body).toContain("최근 실행 없음");
   });
 });
