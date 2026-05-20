@@ -178,14 +178,19 @@ const templates = [
         <h2
           class="mt-3 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
         >
-          신규 3종 — 1/3 진행 중
+          신규 3종 — 2/3 진행 중
         </h2>
         <p class="mt-3 text-zinc-600 dark:text-zinc-400">
-          spec § 3 매핑에서 B 페르소나에 부족한 워크플로 3종(견적 메일·영업 후처리·SNS 답글)을
-          4~6주 안에 순차 추가합니다. 첫 워크플로 <code
+          spec § 3 매핑에서 B 페르소나에 부족한 워크플로 3종(견적 메일·영업 후처리·SNS 답글) 순차 추가 중. <code
             class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
             >quote-email</code
-          >이 다음 릴리스에 포함됩니다.
+          >과 <code
+            class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
+            >sales-followup</code
+          >이 사용 가능. 마지막 <code
+            class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
+            >sns-replies</code
+          >는 약 2주 후 추가.
         </p>
       </div>
 
@@ -232,18 +237,18 @@ const templates = [
         </li>
 
         <li
-          class="flex flex-col rounded-xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950"
+          class="flex flex-col rounded-xl border border-amber-200 bg-amber-50/40 p-5 dark:border-amber-900 dark:bg-amber-950/20"
         >
           <div class="flex items-start justify-between gap-3">
             <div
-              class="font-mono text-sm font-semibold text-zinc-500 dark:text-zinc-500"
+              class="font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100"
             >
               sales-followup
             </div>
             <span
-              class="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+              class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
             >
-              Coming
+              사용 가능
             </span>
           </div>
           <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
@@ -252,13 +257,23 @@ const templates = [
           <p
             class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
           >
-            고객 미팅·통화 노트 → 다음 액션 정리 + follow-up 메일 초안 + 다음
-            일정 제안까지.
+            고객 미팅·통화 raw 노트에서 다음 액션·약속·답변 필요한 질문을
+            정리하고 follow-up 메일 초안 + 다음 일정 제안까지 만듭니다.
           </p>
           <div class="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
             <p class="text-xs italic text-zinc-500 dark:text-zinc-500">
-              예정: 약 2주 후
+              덜어주는 부담: 미팅 끝나고 머릿속 흩어진 액션·약속·다음 일정을
+              메모로 못 옮기는 부담
             </p>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3 text-xs">
+            <a
+              href={`${WORKFLOWS_DIR_URL}/sales-followup.yaml`}
+              rel="noopener"
+              class="inline-flex items-center gap-1 text-brand-600 underline-offset-4 hover:underline dark:text-brand-400"
+            >
+              YAML 소스 보기 ↗
+            </a>
           </div>
         </li>
 
@@ -288,7 +303,7 @@ const templates = [
           </p>
           <div class="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
             <p class="text-xs italic text-zinc-500 dark:text-zinc-500">
-              예정: 약 4주 후
+              예정: 약 2주 후
             </p>
           </div>
         </li>
