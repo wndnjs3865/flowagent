@@ -1,6 +1,15 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { DashboardRun } from "./views/dashboard";
+
+// Legacy type — mirrored locally since DashboardRun was removed from
+// dashboard.tsx in the Result domain uplift. This entire module is deleted
+// in Task 9; do not add new callers.
+type DashboardRun = {
+  workflowName: string;
+  runId: string;
+  startedAt: string;
+  lastOutput: string;
+};
 
 /**
  * Scan `runsDir` for `*.jsonl` files written by `runWorkflow`, extract the

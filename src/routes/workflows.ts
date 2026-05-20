@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { generateRunId, runWorkflow, type StepRunners } from "../runner";
-import { pickLatestRun, readRecentRuns } from "../runs-reader";
+import { getById, getLatest } from "../results";
+import { DASHBOARD_SLUGS } from "../views/dashboard";
 import {
   DEFAULT_TTL_MS,
   generateShareToken,
@@ -14,11 +15,7 @@ import { ExecutiveDashboardPage } from "../views/dashboard";
 import { ErrorPage } from "../views/error";
 import { WorkflowListPage } from "../views/index";
 import { WorkflowRunPage } from "../views/run";
-import {
-  ShareDisabledPage,
-  ShareResultPage,
-  type ShareRun,
-} from "../views/share";
+import { ShareDisabledPage, ShareResultPage } from "../views/share";
 import { listWorkflows, type WorkflowEntry } from "../workflows-dir";
 
 export type WorkflowRoutesDeps = {
@@ -73,10 +70,13 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
   // from `runsDir` and renders a preview card per slot. Empty state shows
   // a "지금 실행 →" link to the workflow detail page.
   app.get("/executive", (c) => {
-    const runs = readRecentRuns(deps.runsDir);
+    const runsBySlug: Record<string, ReturnType<typeof getLatest>> = {};
+    for (const slug of DASHBOARD_SLUGS) {
+      runsBySlug[slug] = getLatest(deps.runsDir, slug);
+    }
     return c.html(
       ExecutiveDashboardPage({
-        runs,
+        runsBySlug,
         shareEnabled: Boolean(deps.shareSecret),
       }),
     );
@@ -100,8 +100,7 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
         400,
       );
     }
-    const runs = readRecentRuns(deps.runsDir);
-    const latest = pickLatestRun(runs, workflow);
+    const latest = getLatest(deps.runsDir, workflow);
     if (!latest) {
       return c.html(
         ErrorPage({
@@ -139,11 +138,8 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
         404,
       );
     }
-    const runs = readRecentRuns(deps.runsDir);
-    const run = runs.find(
-      (r) => r.runId === payload.runId && r.workflowName === payload.workflow,
-    );
-    if (!run) {
+    const run = getById(deps.runsDir, payload.runId);
+    if (!run || run.workflowName !== payload.workflow) {
       return c.html(
         ErrorPage({
           status: 404,
@@ -153,16 +149,15 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
         404,
       );
     }
-    const shareRun: ShareRun = {
-      workflowName: run.workflowName,
-      runId: run.runId,
-      startedAt: run.startedAt,
-      lastOutput: run.lastOutput,
-      expiresAt: payload.expiresAt,
-    };
     const origin = resolvePublicOrigin(c, deps.publicOrigin);
     const shareUrl = `${origin}/share/${token}`;
-    return c.html(ShareResultPage({ run: shareRun, shareUrl }));
+    return c.html(
+      ShareResultPage({
+        run,
+        expiresAt: payload.expiresAt,
+        shareUrl,
+      }),
+    );
   });
 
   app.get("/workflows/:name", (c) => {

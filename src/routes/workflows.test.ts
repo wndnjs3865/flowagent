@@ -336,6 +336,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T00:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "share-me" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
@@ -360,6 +362,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T00:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "share-me" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const app = createWorkflowRoutes(makeDeps());
@@ -411,6 +415,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T00:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "shared" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
@@ -440,6 +446,8 @@ describe("workflow routes", () => {
           index: 0,
           output: "EXEC SHARE PAYLOAD",
         }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
@@ -492,6 +500,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T05:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "soon-gone" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
@@ -566,6 +576,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T07:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "via-proxy" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
@@ -597,6 +609,8 @@ describe("workflow routes", () => {
           startedAt: "2026-05-20T08:00:00.000Z",
         }),
         JSON.stringify({ kind: "step-output", index: 0, output: "fwd" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
+        JSON.stringify({ kind: "done", runId }),
       ].join("\n") + "\n",
     );
     const deps = makeDeps();
