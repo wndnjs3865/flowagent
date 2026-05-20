@@ -58,6 +58,16 @@ type ParsedJsonl = {
   hasDone: boolean;
 };
 
+/**
+ * Read one jsonl file into raw facts (start meta, lastOutput, status flags).
+ * Returns null if the file is missing, empty, or lacks a `run-start` first
+ * line (pre-2026-05-20 format, malformed first line, etc.).
+ *
+ * Does NOT itself apply the completion/success filter — `getLatest` and
+ * `getById` consult `hasFailedStep` and `hasDone` after the fact. Keeps
+ * parsing concerns separate from policy concerns so a future
+ * `getLatestIncludingFailed` can opt out of the filter without re-parsing.
+ */
 function parseJsonl(filePath: string): ParsedJsonl | null {
   let content: string;
   try {

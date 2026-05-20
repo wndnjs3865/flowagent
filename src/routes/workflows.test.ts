@@ -283,6 +283,7 @@ describe("workflow routes", () => {
           startedAt,
         }),
         JSON.stringify({ kind: "step-output", index: 0, output }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: true }),
         JSON.stringify({ kind: "done", runId }),
       ];
       writeFileSync(join(runsDir, `${runId}.jsonl`), lines.join("\n") + "\n");
@@ -321,6 +322,36 @@ describe("workflow routes", () => {
 
     expect(body).not.toContain("DO NOT SHOW");
     // Dashboard still loads cleanly with empty cards
+    expect(body).toContain("최근 실행 없음");
+  });
+
+  it("GET /executive does NOT show output from a failed run (filter enforced at route level)", async () => {
+    // End-to-end guarantee that the "결과 = 완료되고 성공한 실행만" invariant
+    // in results.ts is actually honored by the /executive handler. Unit tests
+    // in results.test.ts cover getLatest's filter; this test locks the
+    // contract at the user-visible surface (dashboard).
+    const runId = "sales-summary-2026-05-20T10-00-00-000Z-fail";
+    writeFileSync(
+      join(runsDir, `${runId}.jsonl`),
+      [
+        JSON.stringify({
+          kind: "run-start",
+          workflowName: "sales-summary",
+          runId,
+          startedAt: "2026-05-20T10:00:00.000Z",
+        }),
+        JSON.stringify({ kind: "step-output", index: 0, output: "MUST NOT APPEAR" }),
+        JSON.stringify({ kind: "step-end", index: 0, ok: false, error: "boom" }),
+        JSON.stringify({ kind: "done", runId }),
+      ].join("\n") + "\n",
+    );
+
+    const app = createWorkflowRoutes(makeDeps());
+    const res = await app.request("/executive");
+    const body = await res.text();
+
+    expect(body).not.toContain("MUST NOT APPEAR");
+    // sales-summary card stays empty since no successful run exists
     expect(body).toContain("최근 실행 없음");
   });
 
