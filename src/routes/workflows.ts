@@ -4,11 +4,24 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { generateRunId, runWorkflow, type StepRunners } from "../runner";
 import { readRecentRuns } from "../runs-reader";
+import {
+  DEFAULT_TTL_MS,
+  generateShareToken,
+  verifyShareToken,
+} from "../share-token";
 import { loadWorkflow } from "../spec";
-import { ExecutiveDashboardPage } from "../views/dashboard";
+import {
+  ExecutiveDashboardPage,
+  type DashboardRun,
+} from "../views/dashboard";
 import { ErrorPage } from "../views/error";
 import { WorkflowListPage } from "../views/index";
 import { WorkflowRunPage } from "../views/run";
+import {
+  ShareDisabledPage,
+  ShareResultPage,
+  type ShareRun,
+} from "../views/share";
 import { listWorkflows, type WorkflowEntry } from "../workflows-dir";
 
 export type WorkflowRoutesDeps = {
@@ -20,6 +33,13 @@ export type WorkflowRoutesDeps = {
   // FLOWAGENT_PILOT_CONTACT_EMAIL only if you fork for your own sales channel;
   // the default below is the FlowAgent official channel.
   pilotContactEmail?: string;
+  /**
+   * HMAC signing secret for `/share/*` URLs (spec § 5 옵션 2 — 사장이 폰으로
+   * 결과 보기). When undefined, the share routes show a "공유 기능 비활성화"
+   * page instead of a token. Set via FLOWAGENT_SHARE_SECRET — must be long and
+   * random (e.g. `openssl rand -base64 32`).
+   */
+  shareSecret?: string;
 };
 
 // Official FlowAgent sales channel (사업자등록번호 607-20-94796). General users
@@ -49,7 +69,95 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
   // a "지금 실행 →" link to the workflow detail page.
   app.get("/executive", (c) => {
     const runs = readRecentRuns(deps.runsDir);
-    return c.html(ExecutiveDashboardPage({ runs }));
+    return c.html(
+      ExecutiveDashboardPage({
+        runs,
+        shareEnabled: Boolean(deps.shareSecret),
+      }),
+    );
+  });
+
+  // Create a share URL for the latest run of a workflow. Hits the same code
+  // path as the dashboard's "📱 공유" link — server-side flow only, no JS in
+  // the browser, no clipboard API. Redirects to /share/<token> on success.
+  app.get("/share/new", (c) => {
+    if (!deps.shareSecret) {
+      return c.html(ShareDisabledPage(), 503);
+    }
+    const workflow = c.req.query("workflow");
+    if (!workflow) {
+      return c.html(
+        ErrorPage({
+          status: 400,
+          title: "공유 URL 요청에 workflow 누락",
+          detail: "/share/new?workflow=<slug> 형식으로 호출하세요.",
+        }),
+        400,
+      );
+    }
+    const runs = readRecentRuns(deps.runsDir);
+    const latest = pickLatest(runs, workflow);
+    if (!latest) {
+      return c.html(
+        ErrorPage({
+          status: 404,
+          title: "공유할 실행 결과 없음",
+          detail: `워크플로 "${workflow}"의 최근 실행 결과가 없습니다. 본사 노트북에서 한 번 실행한 뒤 다시 시도하세요.`,
+        }),
+        404,
+      );
+    }
+    const expiresAt = Date.now() + DEFAULT_TTL_MS;
+    const token = generateShareToken(
+      { workflow, runId: latest.runId, expiresAt },
+      deps.shareSecret,
+    );
+    return c.redirect(`/share/${token}`, 302);
+  });
+
+  // Verify a share token and render the single-card result page. Invalid,
+  // tampered, or expired tokens all show a generic 404 (don't leak which one
+  // failed — the casual user just sees "링크가 만료됐거나 잘못됐어요").
+  app.get("/share/:token", (c) => {
+    if (!deps.shareSecret) {
+      return c.html(ShareDisabledPage(), 503);
+    }
+    const token = c.req.param("token");
+    const payload = verifyShareToken(token, deps.shareSecret);
+    if (!payload) {
+      return c.html(
+        ErrorPage({
+          status: 404,
+          title: "공유 링크가 만료됐거나 잘못됐어요",
+          detail: "본사 노트북에서 새 공유 링크를 만들어 받아주세요.",
+        }),
+        404,
+      );
+    }
+    const runs = readRecentRuns(deps.runsDir);
+    const run = runs.find(
+      (r) => r.runId === payload.runId && r.workflowName === payload.workflow,
+    );
+    if (!run) {
+      return c.html(
+        ErrorPage({
+          status: 404,
+          title: "공유 링크의 실행 결과를 찾을 수 없어요",
+          detail: "실행 기록이 정리됐을 수 있습니다. 새 링크를 받아주세요.",
+        }),
+        404,
+      );
+    }
+    const shareRun: ShareRun = {
+      workflowName: run.workflowName,
+      runId: run.runId,
+      startedAt: run.startedAt,
+      lastOutput: run.lastOutput,
+      expiresAt: payload.expiresAt,
+    };
+    const url = new URL(c.req.url);
+    const shareUrl = `${url.origin}/share/${token}`;
+    return c.html(ShareResultPage({ run: shareRun, shareUrl }));
   });
 
   app.get("/workflows/:name", (c) => {
@@ -126,4 +234,16 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
 
 function findEntry(dir: string, name: string): WorkflowEntry | undefined {
   return listWorkflows(dir).find((w) => w.name === name);
+}
+
+function pickLatest(
+  runs: DashboardRun[],
+  workflow: string,
+): DashboardRun | undefined {
+  let best: DashboardRun | undefined;
+  for (const run of runs) {
+    if (run.workflowName !== workflow) continue;
+    if (!best || run.startedAt > best.startedAt) best = run;
+  }
+  return best;
 }
