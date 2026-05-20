@@ -3,7 +3,9 @@ import { join } from "node:path";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { generateRunId, runWorkflow, type StepRunners } from "../runner";
+import { readRecentRuns } from "../runs-reader";
 import { loadWorkflow } from "../spec";
+import { ExecutiveDashboardPage } from "../views/dashboard";
 import { ErrorPage } from "../views/error";
 import { WorkflowListPage } from "../views/index";
 import { WorkflowRunPage } from "../views/run";
@@ -39,6 +41,15 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
   app.get("/", (c) => {
     const list = listWorkflows(deps.workflowsDir);
     return c.html(WorkflowListPage({ items: list, pilotContactUrl }));
+  });
+
+  // Executive dashboard — mobile-friendly single-page summary of the 4
+  // workflows a D-persona CEO checks daily. Reads the latest run per workflow
+  // from `runsDir` and renders a preview card per slot. Empty state shows
+  // a "지금 실행 →" link to the workflow detail page.
+  app.get("/executive", (c) => {
+    const runs = readRecentRuns(deps.runsDir);
+    return c.html(ExecutiveDashboardPage({ runs }));
   });
 
   app.get("/workflows/:name", (c) => {
