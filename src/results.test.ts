@@ -93,4 +93,19 @@ describe("getLatest", () => {
 
     expect(getLatest(dir, "sales-summary")).toBeNull();
   });
+
+  it("excludes runs that have not completed (no done event)", () => {
+    writeJsonl(dir, "in-flight.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-2026-05-20T08-00-00-000Z-flying",
+        startedAt: "2026-05-20T08:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "still running" },
+      // No step-end, no done — run is in-flight.
+    ]);
+
+    expect(getLatest(dir, "sales-summary")).toBeNull();
+  });
 });
