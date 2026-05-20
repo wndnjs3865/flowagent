@@ -1,13 +1,42 @@
 # FlowAgent
 
+**A local-first Korean SMB workflow orchestrator** — Run pre-built workflows for daily office work entirely on your laptop. Your company data never leaves the machine.
+
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Made for Korean SMB](https://img.shields.io/badge/made_for-Korean%20SMB-emerald)](https://taskflow.kr)
+[![GitHub stars](https://img.shields.io/github/stars/wndnjs3865/flowagent?style=social)](https://github.com/wndnjs3865/flowagent/stargazers)
+
 > 🌐 **[https://taskflow.kr](https://taskflow.kr)** — 다운로드 · 가격 · 문서 · 템플릿
+>
+> **회사 데이터는 노트북 안에만.** 한국어 사무 자동화, **8 워크플로 · 3 페르소나 즉시 사용 가능**.
 
-> **회사 데이터는 노트북 안에만.**
-> **한국어 사무 자동화, 5종 워크플로 바로 시작.**
+🎉 **2026-05-20 출시** — A 사무직 · B 1인 자영업·프리랜서 · D SMB 사장 3 페르소나 카드 모두 작동.
 
-[⬇ 다운로드](https://taskflow.kr/download) · [📖 문서](https://taskflow.kr/docs) · [💰 가격](https://taskflow.kr/pricing) · [🎯 템플릿](https://taskflow.kr/templates)
+[⬇ 다운로드](https://taskflow.kr/download) · [📖 문서](https://taskflow.kr/docs) · [💰 가격](https://taskflow.kr/pricing) · [🎯 8 워크플로](#bundled-workflows) · [📝 LICENSE](LICENSE) · [™ TRADEMARK](TRADEMARK.md)
+
+---
+
+## 한 화면 요약
+
+### 페르소나별 진입
+
+| 페르소나 | 진입 페이지 | 핵심 워크플로 |
+|---|---|---|
+| **A** 사무직 · 총무 · 운영팀 | [/sumu](https://taskflow.kr/sumu) | `meeting-actions` · `weekly-report` · `approval-triage` |
+| **B** 1인 자영업 · 프리랜서 | [/solo](https://taskflow.kr/solo) | `quote-email` · `sales-followup` · `sns-replies` |
+| **D** SMB 사장 · 대표 | [/executive](https://taskflow.kr/executive) | `sales-summary` (매일) · `weekly-report` (받는 입장) |
+
+공통: `sales-summary`·`inquiry-triage`는 페르소나 비중만 다를 뿐 3 페르소나 모두 사용. 자세한 매핑은 [Bundled workflows](#bundled-workflows).
+
+### 차별점 (한국 시장 유일)
+
+- **회사 데이터가 노트북 밖으로 안 나감** (local-first) — Notion AI·ChatGPT·뤼튼은 클라우드 SaaS.
+- **한국어 사무 워크플로 8종 번들** — n8n·Make·Zapier는 빈 페이지에서 시작.
+- **`start.bat` 더블클릭 진입** — 비개발자도 5분 안에 첫 결과.
 
 반복 업무 스트레스를 줄이는 로컬 워크플로우 러너. LLM 호출과 셸 명령을 YAML 한 파일로 엮어 브라우저에서 실행하고, 결과를 SSE로 실시간 스트리밍합니다. 단일 사용자·단일 머신·DAG 없음·큐 없음.
+
+---
 
 ## 빠른 시작
 
@@ -25,8 +54,8 @@
 
 | 누구 | 시작 위치 | 목표 |
 |---|---|---|
-| **일반 사용자 (비개발자, 사무·총무·영업지원)** — 노트북에서 5종 데모를 직접 돌려보고 싶음 | 바로 아래 [일반 사용자용 5분 시작 가이드](#general-user-guide) | 설치 → 5종 데모 실행. customize는 미팅 신청으로 |
-| **개발자 / Pilot 운영자** — 코드 수정, 새 워크플로우 작성, 미팅 시연·customize 진행 | [Developer quickstart](#developer-quickstart) → [Demo path (Pilot 운영자용)](#demo-path-operator) → [Writing a workflow](#writing-a-workflow) | 5종 외 사례를 yaml로, 4주 Pilot 진행, 코드 기여 |
+| **일반 사용자 (비개발자, 사무·총무·영업지원)** — 노트북에서 8 워크플로 데모를 직접 돌려보고 싶음 | 바로 아래 [일반 사용자용 5분 시작 가이드](#general-user-guide) | 설치 → 8 워크플로 데모 실행. customize는 미팅 신청으로 |
+| **개발자 / Pilot 운영자** — 코드 수정, 새 워크플로우 작성, 미팅 시연·customize 진행 | [Developer quickstart](#developer-quickstart) → [Demo path (Pilot 운영자용)](#demo-path-operator) → [Writing a workflow](#writing-a-workflow) | 8 워크플로 외 사례를 yaml로, 4주 Pilot 진행, 코드 기여 |
 
 위 두 경로 모두에 공통으로 유용한 섹션: [1분 데모 영상](#demo-video-1min), [Bundled workflows](#bundled-workflows), [Run logs](#run-logs), [Limits](#limits).
 
@@ -36,7 +65,7 @@
 
 ## 일반 사용자 — 더블클릭 2번이면 끝
 
-> 비개발자도 GitHub·PowerShell·터미널을 모르고 노트북에서 5종 데모를 직접 실행할 수 있게 만든 흐름.
+> 비개발자도 GitHub·PowerShell·터미널을 모르고 노트북에서 8 워크플로 데모를 직접 실행할 수 있게 만든 흐름.
 
 ### 1️⃣ [📦 flowagent ZIP 다운로드](https://github.com/wndnjs3865/flowagent/archive/refs/heads/main.zip)
 
@@ -61,14 +90,18 @@
 
 ### 내 데이터 1개 넣어보기 (선택, 3분)
 
-5종 중 4개는 노트북 안 파일을 LLM 입력으로 씁니다. **그 파일을 본인 데이터로 같은 이름·같은 형식으로 덮어쓰면** 본인 데이터 결과가 즉시 나옵니다.
+**8 워크플로 모두** 노트북 안 파일을 LLM 입력으로 씁니다. **그 파일을 본인 데이터로 같은 이름·같은 형식으로 덮어쓰면** 본인 데이터 결과가 즉시 나옵니다.
 
 | 워크플로우 | 바꿀 파일 | 형식 |
 |---|---|---|
 | `meeting-actions` | `workflows\fixtures\meeting-notes-2026-w19.md` | 한국어 회의록 (.md) |
+| `weekly-report` | `workflows\fixtures\weekly-progress-2026-w19.md` | 한 주 진행 노트 (.md) |
 | `sales-summary` | `workflows\fixtures\sales-2026-04.csv` | CSV (Excel 저장 시 **"CSV UTF-8"**) |
 | `inquiry-triage` | `workflows\fixtures\inquiries-2026-05.csv` | CSV — `id,접수일시,고객명,문의내용` |
 | `approval-triage` | `workflows\fixtures\inbox-approvals-2026-05.md` | 결재 요청 (.md, `## REQ-001` 형식) |
+| `quote-email` | `workflows\fixtures\project-brief-2026-w20.md` | 프로젝트 brief + 본인 단가 (.md) |
+| `sales-followup` | `workflows\fixtures\client-meeting-2026-w22.md` | 미팅 raw 노트 (.md) |
+| `sns-replies` | `workflows\fixtures\sns-comments-2026-w23.md` | SNS 댓글·DM raw export (.md) |
 
 1. 위 표에서 1개 선택 → Explorer에서 해당 파일 **더블클릭**해 열기
 2. 본인 데이터로 내용 바꾸고 저장
@@ -117,7 +150,7 @@ Required env:
 
 ## 1분 데모 영상
 
-> 5종 워크플로우 순회 데모. 노트북에서 5분 시작 → 실제 결과까지 한 화면.
+> 기본 5종 워크플로우 순회 데모. 노트북에서 5분 시작 → 실제 결과까지 한 화면. (B 페르소나 3종은 차기 영상에 포함 예정.)
 
 <!-- 영상 업로드 후 아래 PLACEHOLDER 두 줄을 교체:
      1. video src — GitHub Release asset URL (`gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'`)
@@ -151,7 +184,7 @@ gh release create v0.1.0-demo --title "Pilot demo assets v0.1" \
 gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'
 ```
 
-5종 워크플로우 실시간 실행 검증 결과 (이 README와 동시 발행): weekly-report 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축.
+기본 5종 워크플로우 실시간 실행 검증 결과 (영상 storyboard 측정 기준): weekly-report 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축. (B 페르소나 3종 timing은 차기 측정 시 추가.)
 
 <a id="demo-path-operator"></a>
 
@@ -168,7 +201,7 @@ prereqs, 3 minutes if Node/pnpm are already installed.
 
 ### Windows 사용자 안내 (PowerShell · cmd · Git Bash 모두 동일 동작)
 
-이 프로젝트의 shell step은 OS-중립 `node -e "..."` 한 줄로 통일돼 있어 **추가로 Git Bash·WSL 설치가 필요 없습니다.** Windows 표준 PowerShell·cmd 어느 쪽에서도 5종 워크플로우가 그대로 동작합니다.
+이 프로젝트의 shell step은 OS-중립 `node -e "..."` 한 줄로 통일돼 있어 **추가로 Git Bash·WSL 설치가 필요 없습니다.** Windows 표준 PowerShell·cmd 어느 쪽에서도 8 워크플로 모두 그대로 동작합니다.
 
 | 단계 | 명령 (PowerShell 또는 cmd) |
 |---|---|
