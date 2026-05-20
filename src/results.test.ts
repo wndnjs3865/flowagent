@@ -108,6 +108,77 @@ describe("getLatest", () => {
 
     expect(getLatest(dir, "sales-summary")).toBeNull();
   });
+
+  it("skips jsonl files with malformed first line", () => {
+    writeFileSync(join(dir, "bad.jsonl"), "not valid json\n");
+    expect(getLatest(dir, "sales-summary")).toBeNull();
+  });
+
+  it("returns a result with empty lastOutput when no step-output emitted", () => {
+    writeJsonl(dir, "no-output.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "weekly-report",
+        runId: "weekly-report-empty",
+        startedAt: "2026-05-20T10:00:00.000Z",
+      },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "weekly-report-empty" },
+    ]);
+
+    const result = getLatest(dir, "weekly-report");
+    expect(result?.lastOutput).toBe("");
+  });
+
+  it("picks the last step-output when a run has multiple step outputs", () => {
+    writeJsonl(dir, "multi.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-multi",
+        startedAt: "2026-05-20T11:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "FIRST" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "step-output", index: 1, output: "MIDDLE" },
+      { kind: "step-end", index: 1, ok: true },
+      { kind: "step-output", index: 2, output: "LAST" },
+      { kind: "step-end", index: 2, ok: true },
+      { kind: "done", runId: "sales-summary-multi" },
+    ]);
+
+    expect(getLatest(dir, "sales-summary")?.lastOutput).toBe("LAST");
+  });
+
+  it("ignores malformed lines in the middle but keeps the most recent valid step-output", () => {
+    const validRunStart = JSON.stringify({
+      kind: "run-start",
+      workflowName: "inquiry-triage",
+      runId: "inquiry-triage-partial",
+      startedAt: "2026-05-20T12:00:00.000Z",
+    });
+    const validEarlyOutput = JSON.stringify({
+      kind: "step-output",
+      index: 0,
+      output: "VALID OUTPUT",
+    });
+    const validEnd = JSON.stringify({
+      kind: "step-end",
+      index: 0,
+      ok: true,
+    });
+    const corrupted = "{ not valid";
+    const validDone = JSON.stringify({
+      kind: "done",
+      runId: "inquiry-triage-partial",
+    });
+    writeFileSync(
+      join(dir, "partial.jsonl"),
+      [validRunStart, validEarlyOutput, validEnd, corrupted, validDone].join("\n") + "\n",
+    );
+
+    expect(getLatest(dir, "inquiry-triage")?.lastOutput).toBe("VALID OUTPUT");
+  });
 });
 
 describe("getById", () => {
