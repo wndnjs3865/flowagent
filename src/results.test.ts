@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getLatest } from "./results";
+import { getById, getLatest } from "./results";
 
 function makeTempDir(): string {
   return mkdtempSync(join(tmpdir(), "flowagent-results-"));
@@ -107,5 +107,65 @@ describe("getLatest", () => {
     ]);
 
     expect(getLatest(dir, "sales-summary")).toBeNull();
+  });
+});
+
+describe("getById", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = makeTempDir();
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("returns the run with the matching runId", () => {
+    writeJsonl(dir, "a.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-A",
+        startedAt: "2026-05-20T08:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "OUTPUT-A" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "sales-summary-A" },
+    ]);
+    writeJsonl(dir, "b.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-B",
+        startedAt: "2026-05-20T09:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "OUTPUT-B" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "sales-summary-B" },
+    ]);
+
+    const result = getById(dir, "sales-summary-A");
+    expect(result?.runId).toBe("sales-summary-A");
+    expect(result?.lastOutput).toBe("OUTPUT-A");
+  });
+
+  it("returns null when no jsonl has the runId", () => {
+    expect(getById(dir, "nonexistent")).toBeNull();
+  });
+
+  it("returns null for a runId whose run failed", () => {
+    writeJsonl(dir, "failed.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-X",
+        startedAt: "2026-05-20T08:00:00.000Z",
+      },
+      { kind: "step-end", index: 0, ok: false, error: "boom" },
+      { kind: "done", runId: "sales-summary-X" },
+    ]);
+
+    expect(getById(dir, "sales-summary-X")).toBeNull();
   });
 });

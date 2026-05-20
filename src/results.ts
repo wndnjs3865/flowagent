@@ -136,3 +136,20 @@ export function getLatest(runsDir: string, workflow: string): Result | null {
   }
   return best;
 }
+
+export function getById(runsDir: string, runId: string): Result | null {
+  for (const file of listJsonlFiles(runsDir)) {
+    const parsed = parseJsonl(join(runsDir, file));
+    if (!parsed) continue;
+    if (parsed.start.runId !== runId) continue;
+    if (parsed.hasFailedStep) return null;
+    if (!parsed.hasDone) return null;
+    return {
+      workflowName: parsed.start.workflowName,
+      runId: parsed.start.runId,
+      startedAt: parsed.start.startedAt,
+      lastOutput: parsed.lastOutput,
+    };
+  }
+  return null;
+}
