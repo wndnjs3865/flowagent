@@ -76,4 +76,21 @@ describe("getLatest", () => {
 
     expect(getLatest(dir, "sales-summary")).toBeNull();
   });
+
+  it("excludes runs that have a failed step (step-end ok:false)", () => {
+    writeJsonl(dir, "failed.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-2026-05-20T08-00-00-000Z-fail",
+        startedAt: "2026-05-20T08:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "first ok" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "step-end", index: 1, ok: false, error: "boom" },
+      { kind: "done", runId: "sales-summary-2026-05-20T08-00-00-000Z-fail" },
+    ]);
+
+    expect(getLatest(dir, "sales-summary")).toBeNull();
+  });
 });

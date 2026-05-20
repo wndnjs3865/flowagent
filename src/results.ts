@@ -19,6 +19,10 @@ type RunStartEvent = {
 
 type StepOutputEvent = { kind: "step-output"; output: string };
 
+type StepEndEvent = { kind: "step-end"; ok: boolean };
+
+type DoneEvent = { kind: "done" };
+
 function isRunStart(value: unknown): value is RunStartEvent {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -36,9 +40,22 @@ function isStepOutput(value: unknown): value is StepOutputEvent {
   return v.kind === "step-output" && typeof v.output === "string";
 }
 
+function isStepEnd(value: unknown): value is StepEndEvent {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return v.kind === "step-end" && typeof v.ok === "boolean";
+}
+
+function isDone(value: unknown): value is DoneEvent {
+  if (typeof value !== "object" || value === null) return false;
+  return (value as Record<string, unknown>).kind === "done";
+}
+
 type ParsedJsonl = {
   start: RunStartEvent;
   lastOutput: string;
+  hasFailedStep: boolean;
+  hasDone: boolean;
 };
 
 function parseJsonl(filePath: string): ParsedJsonl | null {
@@ -61,19 +78,34 @@ function parseJsonl(filePath: string): ParsedJsonl | null {
   if (!isRunStart(firstEvent)) return null;
 
   let lastOutput = "";
+  let lastOutputFound = false;
+  let hasFailedStep = false;
+  let hasDone = false;
+  for (let i = 0; i < lines.length; i++) {
+    let event: unknown;
+    try {
+      event = JSON.parse(lines[i] as string);
+    } catch {
+      continue;
+    }
+    if (isStepEnd(event) && !event.ok) hasFailedStep = true;
+    if (isDone(event)) hasDone = true;
+  }
+  // Scan backward separately to find the latest step-output.
   for (let i = lines.length - 1; i >= 0; i--) {
+    if (lastOutputFound) break;
     try {
       const event = JSON.parse(lines[i] as string);
       if (isStepOutput(event)) {
         lastOutput = event.output;
-        break;
+        lastOutputFound = true;
       }
     } catch {
       // Skip malformed lines but keep scanning earlier ones.
     }
   }
 
-  return { start: firstEvent, lastOutput };
+  return { start: firstEvent, lastOutput, hasFailedStep, hasDone };
 }
 
 function listJsonlFiles(runsDir: string): string[] {
@@ -90,6 +122,8 @@ export function getLatest(runsDir: string, workflow: string): Result | null {
     const parsed = parseJsonl(join(runsDir, file));
     if (!parsed) continue;
     if (parsed.start.workflowName !== workflow) continue;
+    if (parsed.hasFailedStep) continue;
+    if (!parsed.hasDone) continue;
     const candidate: Result = {
       workflowName: parsed.start.workflowName,
       runId: parsed.start.runId,
