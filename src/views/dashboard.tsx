@@ -1,12 +1,5 @@
-import { pickLatestRun } from "../runs-reader";
+import type { Result } from "../results";
 import { Layout } from "./layout";
-
-export type DashboardRun = {
-  workflowName: string;
-  runId: string;
-  startedAt: string;
-  lastOutput: string;
-};
 
 // Curated dashboard cards — only the 4 workflows a Korean SMB CEO would
 // realistically want as a single-screen daily summary. B-persona workflows
@@ -45,6 +38,10 @@ const DASHBOARD_SLOTS: DashboardSlot[] = [
     context: "한 주 진행 → Slack 공유 메시지",
   },
 ];
+
+/** Slugs the executive dashboard cares about. Exported so the route can
+ * resolve a `Result | null` per slot via `getLatest(dir, slug)`. */
+export const DASHBOARD_SLUGS = DASHBOARD_SLOTS.map((s) => s.slug);
 
 // Trim a long LLM output to a single-screen preview, capped at ~280 Korean
 // chars (≈ a tweet's length). Uses `Array.from` to slice by Unicode code
@@ -88,20 +85,13 @@ function relativeTime(iso: string, now: Date = new Date()): string {
 }
 
 export function ExecutiveDashboardPage(props: {
-  runs: DashboardRun[];
-  /**
-   * Render the "📱 공유" button on cards that have a run. Disabled when
-   * FLOWAGENT_SHARE_SECRET is not set on the server (otherwise clicking the
-   * button would hit /share/new and get a 503 with the disabled-page copy —
-   * better to not show the button at all).
-   */
+  /** Resolved `Result | null` keyed by workflow slug. Route builds this
+   * via `getLatest(runsDir, slug)` for each DASHBOARD_SLUGS entry. */
+  runsBySlug: Record<string, Result | null>;
   shareEnabled?: boolean;
   generatedAt?: Date;
 }) {
   const now = props.generatedAt ?? new Date();
-  // Latest-run-per-slot is computed via the shared pickLatestRun helper.
-  // Each slot is independent so we just call it per slug — the cost is
-  // bounded by the 4-slot DASHBOARD_SLOTS constant, not the slot count.
 
   return (
     <Layout title="사장 대시보드">
@@ -125,7 +115,7 @@ export function ExecutiveDashboardPage(props: {
 
       <div class="grid gap-4 md:grid-cols-2">
         {DASHBOARD_SLOTS.map((slot) => {
-          const run = pickLatestRun(props.runs, slot.slug);
+          const run = props.runsBySlug[slot.slug] ?? null;
           if (!run) {
             return (
               <div class="rounded-xl border border-dashed border-gray-300 bg-white p-5">

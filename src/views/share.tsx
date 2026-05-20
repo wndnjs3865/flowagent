@@ -1,13 +1,5 @@
+import type { Result } from "../results";
 import { Layout } from "./layout";
-
-export type ShareRun = {
-  workflowName: string;
-  runId: string;
-  startedAt: string;
-  lastOutput: string;
-  /** Epoch ms — UI shows "X분 후 만료" relative to current time. */
-  expiresAt: number;
-};
 
 const SLOT_META: Record<string, { icon: string; label: string }> = {
   "sales-summary": { icon: "📊", label: "매출 요약" },
@@ -31,8 +23,11 @@ function expiryLabel(expiresAt: number, now: number): string {
 }
 
 export function ShareResultPage(props: {
-  run: ShareRun;
-  /** Full token URL — shown in a copy box at the bottom so the recipient can re-share. */
+  run: Result;
+  /** Epoch ms — UI shows "X분 후 만료" relative to current time. Comes from
+   * the verified share token, not the Result itself. */
+  expiresAt: number;
+  /** Full token URL — shown in a copy box at the bottom. */
   shareUrl: string;
   generatedAt?: Date;
 }) {
@@ -76,7 +71,7 @@ export function ShareResultPage(props: {
         <div class="rounded-lg bg-gray-50 px-3 py-2">
           <dt class="text-gray-500">만료</dt>
           <dd class="mt-0.5 font-semibold text-gray-800">
-            {expiryLabel(props.run.expiresAt, now)}
+            {expiryLabel(props.expiresAt, now)}
           </dd>
         </div>
       </dl>
