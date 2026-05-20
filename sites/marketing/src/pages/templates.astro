@@ -175,22 +175,28 @@ const templates = [
         >
           1인 자영업·프리랜서 · B 페르소나
         </div>
+        <div
+          class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+        >
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          출시 완료 · 3/3 사용 가능
+        </div>
         <h2
           class="mt-3 text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100"
         >
-          신규 3종 — 2/3 진행 중
+          신규 3종 — 출시 완료
         </h2>
         <p class="mt-3 text-zinc-600 dark:text-zinc-400">
-          spec § 3 매핑에서 B 페르소나에 부족한 워크플로 3종(견적 메일·영업 후처리·SNS 답글) 순차 추가 중. <code
+          spec § 3 매핑에서 B 페르소나에 부족한 워크플로 3종(견적 메일·영업 후처리·SNS 답글)이 모두 사용 가능합니다. <code
             class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
             >quote-email</code
-          >과 <code
+          > · <code
             class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
             >sales-followup</code
-          >이 사용 가능. 마지막 <code
+          > · <code
             class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs dark:bg-zinc-900"
             >sns-replies</code
-          >는 약 2주 후 추가.
+          > 모두 v0.1.x zip에 포함.
         </p>
       </div>
 
@@ -278,18 +284,18 @@ const templates = [
         </li>
 
         <li
-          class="flex flex-col rounded-xl border border-dashed border-zinc-300 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950"
+          class="flex flex-col rounded-xl border border-amber-200 bg-amber-50/40 p-5 dark:border-amber-900 dark:bg-amber-950/20"
         >
           <div class="flex items-start justify-between gap-3">
             <div
-              class="font-mono text-sm font-semibold text-zinc-500 dark:text-zinc-500"
+              class="font-mono text-sm font-semibold text-zinc-900 dark:text-zinc-100"
             >
               sns-replies
             </div>
             <span
-              class="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+              class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
             >
-              Coming
+              사용 가능
             </span>
           </div>
           <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
@@ -298,13 +304,23 @@ const templates = [
           <p
             class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
           >
-            Instagram·블로그 댓글 → 카테고리 분류 + 답글 초안 + 신고·스팸
-            거름망.
+            인스타·블로그 한 주간 댓글·DM raw 목록 → 스팸·홍보 걸러내고
+            카테고리별 답글 초안 + 협업·견적 lead 별도 추적.
           </p>
           <div class="mt-4 border-t border-zinc-200 pt-3 dark:border-zinc-800">
             <p class="text-xs italic text-zinc-500 dark:text-zinc-500">
-              예정: 약 2주 후
+              덜어주는 부담: 매일 들어오는 인스타 DM·블로그 댓글에 일일이 답글
+              톤 맞추고 스팸 거르고 진짜 lead 놓치지 않는 피로
             </p>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-3 text-xs">
+            <a
+              href={`${WORKFLOWS_DIR_URL}/sns-replies.yaml`}
+              rel="noopener"
+              class="inline-flex items-center gap-1 text-brand-600 underline-offset-4 hover:underline dark:text-brand-400"
+            >
+              YAML 소스 보기 ↗
+            </a>
           </div>
         </li>
       </ul>
