@@ -1,0 +1,54 @@
+name: weekly-report
+description: 한 주간 진행 보고서를 한국어로 정리하고 Slack 공유용 메시지까지 만듭니다.
+persona: 사무직 A ★★★ · 사장 D ★★
+stressRelieved: 매주 같은 보고서를 처음부터 다시 쓰는 30분
+steps:
+  - type: shell
+    name: load-progress
+    command: |
+      node -e "process.stdout.write(require('fs').readFileSync('workflows/fixtures/weekly-progress-2026-w19.md','utf8'))"
+
+  - type: llm
+    name: structure-report
+    prompt: |
+      You are a Korean SMB office manager preparing this week's progress report
+      for the CEO. Reorganize the raw weekly notes below into a clean Korean
+      Markdown report with these four sections (each 1–3 short bullet lines):
+
+      1. **완료** — 이번 주에 끝난 일. 담당자와 결과를 한 줄로.
+      2. **진행 중** — 계속 중인 일과 다음 마일스톤. 담당자 + 다음 액션.
+      3. **지연·이슈** — 지연됐거나 막힌 항목. 원인 한 줄 + 다음 조치 한 줄.
+      4. **다음 주 일정** — 가장 중요한 회의·마감 1~3개.
+
+      Rules:
+      - Use bullets only (no paragraphs).
+      - Always cite the 담당자 if the source mentions one.
+      - Dates in ISO (YYYY-MM-DD) when explicit, "미정" otherwise.
+      - Output in Korean only, no preamble, no closing remark.
+
+      ---
+      {{prev}}
+      ---
+
+  - type: shell
+    name: stamp-report
+    command: |
+      node -e "process.stdout.write('=== 2026년 5월 셋째 주 진행 보고 (자동 정리) ===\n' + {{prev}} + '\n=== 보고서 끝 ===\n')"
+
+  - type: llm
+    name: slack-summary
+    prompt: |
+      Convert the structured progress report below into a Slack-pasteable
+      Korean summary message for the leadership channel.
+
+      Style:
+      - Start with one greeting line (예: "이번 주 진행 상황 공유드려요 📝").
+      - Then 4 short blocks in this exact order: *완료* / *진행 중* / *지연·이슈* / *다음 주*.
+      - Each block: 1 line header + max 3 bullet points.
+      - Keep total length under 130 Korean words.
+      - Friendly but professional tone — no bureaucratic phrases ("관련하여", "사료됨" 등 금지).
+      - Output in Korean only, no preamble outside the greeting line.
+
+      ---
+      {{prev}}
+      ---

@@ -58,7 +58,7 @@ src/views/layout.tsx                  # Hono JSX 레이아웃 (Tailwind CDN)
 src/views/index.tsx                   # Workflow 목록
 src/views/run.tsx                     # Run 페이지 (SSE 소비 클라이언트 스크립트 포함)
 
-workflows/weekly-report-demo.yaml     # 샘플: LLM → shell → LLM (3 step)
+workflows/weekly-report.yaml     # 샘플: shell → LLM → shell → LLM (4 step)
 runs/.gitkeep
 
 src/spec.test.ts                      # zod 거절 케이스 + happy parse
@@ -106,7 +106,7 @@ export function runShellStep(step: ShellStep, ctx: RunCtx): Promise<string>;
 ## Verification
 
 - [ ] `pnpm install && pnpm dev` 실행 시 `http://localhost:3000` 에서 workflow 목록 페이지 렌더링
-- [ ] `workflows/weekly-report-demo.yaml` 상세 페이지에서 "Run" 클릭 시 각 step 결과가 SSE로 스트리밍되며 화면에 누적 표시
+- [ ] `workflows/weekly-report.yaml` 상세 페이지에서 "Run" 클릭 시 각 step 결과가 SSE로 스트리밍되며 화면에 누적 표시
 - [ ] 실행 완료 후 `runs/<ts>.jsonl`에 step별 입출력 1라인씩 기록 (line-delimited JSON)
 - [ ] `pnpm test` — `runner.test.ts` + `spec.test.ts` 통과 (모의 LLM 사용, 실제 Anthropic 호출 없음)
 - [ ] 잘못된 YAML(예: 필수 필드 누락)이면 UI에 zod 에러 메시지가 표시되고 서버는 죽지 않음

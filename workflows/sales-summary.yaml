@@ -1,6 +1,6 @@
 name: sales-summary
 description: 월간 매출 CSV를 한국어 경영진 1-pager 리포트로 변환합니다.
-persona: 영업관리 / 대표 보고
+persona: 사장 D ★★★ · 사무직 A ★★ · 자영업 B ★★
 stressRelieved: 월말마다 이상치 찾고 1-pager 만드는 압박
 steps:
   - type: shell

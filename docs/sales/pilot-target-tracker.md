@@ -9,7 +9,7 @@
 
 | 워크플로우 | 페르소나 | 페인이 큰 업종 (가설) | 첫 컨택 시 강조 포인트 |
 |---|---|---|---|
-| `weekly-report-demo` | manager | 모든 SMB 운영팀 | "매주 비슷한 양식 다시 쓰는 시간" |
+| `weekly-report` | manager | 모든 SMB 운영팀 | "매주 비슷한 양식 다시 쓰는 시간" |
 | `meeting-actions` | manager | 컨설팅·에이전시·리서치 (회의 多) | "회의록 → 액션아이템 자동 추출" |
 | `sales-summary` | finance/sales | 이커머스·유통·D2C (매출 CSV 매월) | "월말 매출 1-pager 자동 생성" |
 | `inquiry-triage` | cs | B2C SaaS·이커머스·교육 CS팀 | "문의 카테고리·긴급도 분류 + 답변 초안" |
@@ -51,7 +51,7 @@
 
 | # | 회사명 | 업종 / 규모 | 추천 워크플로우 | 담당자 / 이메일 | 채널 | 발신일 | 상태 |
 |---|---|---|---|---|---|---|---|
-| 1 | (채워넣기) | (예: SaaS / 30–50인) | weekly-report-demo | (담당자명 / 이메일) | warm-intro | — | planned |
+| 1 | (채워넣기) | (예: SaaS / 30–50인) | weekly-report | (담당자명 / 이메일) | warm-intro | — | planned |
 | 2 | (채워넣기) | (예: 이커머스 / 50–100인) | sales-summary | (담당자명 / 이메일) | warm-intro | — | planned |
 | 3 | (채워넣기) | (예: 컨설팅 / 20–40인) | meeting-actions | (담당자명 / 이메일) | warm-intro | — | planned |
 | 4 | (채워넣기) | (예: 교육 SaaS / 30–60인) | inquiry-triage | (담당자명 / 이메일) | LinkedIn | — | planned |
@@ -59,7 +59,7 @@
 | 6 | (채워넣기) | (예: D2C 브랜드 / 20–50인) | sales-summary | (담당자명 / 이메일) | LinkedIn | — | planned |
 | 7 | (채워넣기) | (예: B2C 앱 / 40–80인) | inquiry-triage | (담당자명 / 이메일) | 채용공고 | — | planned |
 | 8 | (채워넣기) | (예: 에이전시 / 15–30인) | meeting-actions | (담당자명 / 이메일) | 채용공고 | — | planned |
-| 9 | (채워넣기) | (예: SaaS / 50–100인) | weekly-report-demo | (담당자명 / 이메일) | 커뮤니티 | — | planned |
+| 9 | (채워넣기) | (예: SaaS / 50–100인) | weekly-report | (담당자명 / 이메일) | 커뮤니티 | — | planned |
 | 10 | (채워넣기) | (예: 핀테크 / 30–80인) | approval-triage | (담당자명 / 이메일) | 커뮤니티 | — | planned |
 
 ## 발신 후 follow-up 룰

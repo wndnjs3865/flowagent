@@ -151,7 +151,7 @@ gh release create v0.1.0-demo --title "Pilot demo assets v0.1" \
 gh release view v0.1.0-demo --json assets --jq '.assets[0].browser_download_url'
 ```
 
-5종 워크플로우 실시간 실행 검증 결과 (이 README와 동시 발행): weekly-report-demo 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축.
+5종 워크플로우 실시간 실행 검증 결과 (이 README와 동시 발행): weekly-report 9초 / meeting-actions 10초 / sales-summary 15초 / inquiry-triage 24초 / approval-triage 17초 — 총 75초. 컷 편집으로 60초 압축.
 
 <a id="demo-path-operator"></a>
 
@@ -256,15 +256,15 @@ ls runs/*.jsonl 2>/dev/null | wc -l   # 0이면 OK, 아니면 mv runs runs.bak &
 | 상대 | 추천 시연 순서 (3분) | 클로징 강조점 |
 |---|---|---|
 | **CS팀장 / 운영팀장** | `inquiry-triage` → `meeting-actions` → `approval-triage` | "매일 답변 톤 통일 + 우선순위 분류 + 결재 누락 방지" |
-| **재무·총무·CFO** | `sales-summary` → `approval-triage` → `weekly-report-demo` | "월말 1-pager 자동화 + 결재 잔량 가시화 + 주간 보고 표준화" |
-| **대표·실무 매니저** | `weekly-report-demo` → `meeting-actions` → `sales-summary` | "보고 자동화 3종 세트 — 주간/회의/월간" |
+| **재무·총무·CFO** | `sales-summary` → `approval-triage` → `weekly-report` | "월말 1-pager 자동화 + 결재 잔량 가시화 + 주간 보고 표준화" |
+| **대표·실무 매니저** | `weekly-report` → `meeting-actions` → `sales-summary` | "보고 자동화 3종 세트 — 주간/회의/월간" |
 | **잡탕(혼합)** | 위 범용 스크립트 그대로 | 데이터 위치 + 5분 시작 + JSONL 감사 로그 |
 
 ### 장애 발생 시 30초 복구 (live 데모 도중)
 
 | 증상 | 한 줄 복구 | 안 되면 |
 |---|---|---|
-| `step-end ... ok:false` 첫 LLM 단계 실패 | "API 키 한도 초과예요" → `weekly-report-demo` 대신 1단계만인 shell-only 사례로 우회 | `runs/*.jsonl` 미리 캡처해 둔 이전 성공 결과를 화면에 띄움 |
+| `step-end ... ok:false` 첫 LLM 단계 실패 | "API 키 한도 초과예요" → `weekly-report` 대신 1단계만인 shell-only 사례로 우회 | `runs/*.jsonl` 미리 캡처해 둔 이전 성공 결과를 화면에 띄움 |
 | 브라우저에 한국어 깨짐 | 새로고침 (Ctrl/Cmd+R) — Tailwind CDN 캐시 문제 90% | 다른 워크플로우로 즉시 전환, 깨짐은 미팅 후 처리 |
 | SSE가 멈춤 (3초 이상 출력 없음) | "잠시 LLM 응답 대기 중입니다" 한 마디 + 우회로 다른 탭 열어 두 번째 워크플로우 Run | 첫 탭은 그대로 두고 두 번째 탭에서 진행 |
 | 서버 자체 죽음 | 터미널 `pnpm dev` 재실행(2초) | "로컬 환경 변수가 꼬여서요" 솔직 + 캡처본으로 마무리 |
@@ -285,13 +285,13 @@ The `workflows/` directory ships five end-to-end demos covering the most common 
 tasks. All use Korean fixtures under `workflows/fixtures/` and English LLM prompts that emit Korean
 output (see [`feedback_demo_fixture_language`](./CLAUDE.md) rule for why).
 
-| Workflow | What it does | Persona | 없애주는 반복 업무 스트레스 |
+| Workflow | What it does | Persona (spec § 3) | 없애주는 반복 업무 스트레스 |
 |---|---|---|---|
-| `weekly-report-demo` | 3-bullet weekly status → Slack rewrite | 팀 리드 / 매니저 | 매주 같은 보고서를 처음부터 다시 쓰는 30분 |
-| `meeting-actions` | 회의록 → 담당자별 액션 표 → Slack 보고 포맷 | 운영팀 / PM | 회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하 |
-| `sales-summary` | 월간 매출 CSV → 채널·이상치 분석 → 경영진 3-문장 요약 | 영업관리 / 대표 보고 | 월말마다 이상치 찾고 1-pager 만드는 압박 |
-| `inquiry-triage` | 고객 문의 CSV → 카테고리·긴급도 분류 + 카테고리별 답변 초안 | CS팀 / 운영 | 매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로 |
-| `approval-triage` | 결재 대기함 → 자동승인·검토·정보부족 분류 + 오늘의 brief | 총무 / 사무관리 | 결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하 |
+| `weekly-report` | 한 주 진행 노트 → 4-section 구조화 → Slack 공유용 메시지 | 사무직 A ★★★ · 사장 D ★★ | 매주 같은 보고서를 처음부터 다시 쓰는 30분 |
+| `meeting-actions` | 회의록 → 담당자별 액션 표 → Slack 보고 포맷 | 사무직 A ★★★ · 사장 D ★★ | 회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하 |
+| `sales-summary` | 월간 매출 CSV → 채널·이상치 분석 → 경영진 3-문장 요약 | 사장 D ★★★ · 사무직 A ★★ · 자영업 B ★★ | 월말마다 이상치 찾고 1-pager 만드는 압박 |
+| `inquiry-triage` | 고객 문의 CSV → 카테고리·긴급도 분류 + 카테고리별 답변 초안 | 자영업 B ★★★ · 사무직 A ★★ | 매일 같은 톤으로 답변 쓰고 우선순위 매기는 피로 |
+| `approval-triage` | 결재 대기함 → 자동승인·검토·정보부족 분류 + 오늘의 brief | 사무직 A ★★★ · 사장 D ★★ | 결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하 |
 
 To adapt one for a real Pilot case, edit the file in `workflows/fixtures/` to the customer's own data —
 the YAML prompts stay the same. The customer's data never leaves their machine.
@@ -339,7 +339,7 @@ workflows/fixtures/acme-sample.md
 
 Drop a `<name>.yaml` file in `workflows/`. The filename (without extension) becomes the URL slug; the
 `name:` field is the human-readable label shown in the UI. See
-[`workflows/weekly-report-demo.yaml`](./workflows/weekly-report-demo.yaml) for a working 3-step demo.
+[`workflows/weekly-report.yaml`](./workflows/weekly-report.yaml) for a working 3-step demo.
 
 ```yaml
 name: my-workflow

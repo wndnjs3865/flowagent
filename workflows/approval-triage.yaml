@@ -1,6 +1,6 @@
 name: approval-triage
 description: 결재함에 쌓인 요청을 자동승인/관리자 검토/정보 부족으로 분류하고 "오늘 처리할 결재" brief를 만듭니다.
-persona: 총무 / 사무관리
+persona: 사무직 A ★★★ · 사장 D ★★
 stressRelieved: 결재함에 줄선 요청을 하나씩 읽고 판단하는 인지 부하
 steps:
   - type: shell

@@ -506,22 +506,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
           <pre
             class="overflow-x-auto bg-zinc-950 p-5 font-mono text-xs leading-relaxed text-zinc-100"><code><span class="text-zinc-400">name:</span> <span class="text-amber-300">weekly-report</span>
-<span class="text-zinc-400">description:</span> <span class="text-amber-300">"주간 매출 CSV → 1-pager 리포트"</span>
+<span class="text-zinc-400">description:</span> <span class="text-amber-300">"한 주간 진행 보고 → Slack 공유 메시지"</span>
 
 <span class="text-zinc-400">steps:</span>
-  - <span class="text-zinc-400">id:</span> <span class="text-amber-300">load_csv</span>
-    <span class="text-zinc-400">run:</span> <span class="text-emerald-300">shell</span>
-    <span class="text-zinc-400">cmd:</span> <span class="text-amber-300">cat sales-2026-04.csv</span>
+  - <span class="text-zinc-400">name:</span> <span class="text-amber-300">load-progress</span>
+    <span class="text-zinc-400">type:</span> <span class="text-emerald-300">shell</span>
+    <span class="text-zinc-400">command:</span> <span class="text-amber-300">cat fixtures/weekly-progress.md</span>
 
-  - <span class="text-zinc-400">id:</span> <span class="text-amber-300">draft</span>
-    <span class="text-zinc-400">run:</span> <span class="text-emerald-300">llm</span>
+  - <span class="text-zinc-400">name:</span> <span class="text-amber-300">structure-report</span>
+    <span class="text-zinc-400">type:</span> <span class="text-emerald-300">llm</span>
     <span class="text-zinc-400">prompt:</span> |
-      <span class="text-amber-300">아래 CSV를 한국어 1-pager로:</span>
-      <span class="text-amber-300">&#123;&#123; load_csv.stdout &#125;&#125;</span>
+      <span class="text-amber-300">아래 한 주 노트를 완료·진행 중·지연·</span>
+      <span class="text-amber-300">다음 주 4섹션 한국어 보고서로:</span>
+      <span class="text-amber-300">&#123;&#123; prev &#125;&#125;</span>
 
-  - <span class="text-zinc-400">id:</span> <span class="text-amber-300">save</span>
-    <span class="text-zinc-400">run:</span> <span class="text-emerald-300">shell</span>
-    <span class="text-zinc-400">cmd:</span> <span class="text-amber-300">echo "&#123;&#123; draft.text &#125;&#125;" &gt; report.md</span></code></pre>
+  - <span class="text-zinc-400">name:</span> <span class="text-amber-300">slack-summary</span>
+    <span class="text-zinc-400">type:</span> <span class="text-emerald-300">llm</span>
+    <span class="text-zinc-400">prompt:</span> <span class="text-amber-300">Slack 공유용 130자 한국어 메시지로 다듬어줘.</span></code></pre>
         </div>
       </div>
     </div>

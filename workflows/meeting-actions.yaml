@@ -1,6 +1,6 @@
 name: meeting-actions
 description: 한국어 회의록에서 액션 아이템·담당자·마감일을 뽑아 Slack 보고 포맷으로 정리합니다.
-persona: 운영 / PM
+persona: 사무직 A ★★★ · 사장 D ★★
 stressRelieved: 회의 끝나고 회의록 다시 읽으며 액션을 추리는 인지 부하
 steps:
   - type: shell

@@ -25,7 +25,7 @@ curl -sf http://localhost:3000/ > /dev/null && echo OK
 |---|---|---|---|---|
 | **0:00–0:05** | Title card (`assets/pilot-demo-title.png` 또는 텍스트 오버레이) | — | "FlowAgent — 한 번 설정하면, 업무가 알아서 흐른다." | 0:00 정적 1초 + 0:01–0:05 페이드인 |
 | **0:05–0:12** | localhost:3000 listing page 풀화면 | 페이지 전체 천천히 스크롤 한 번 | "한국 중소기업 사무팀이 매일 반복하는 일 5가지. 워크플로우 카드 하나가 한 가지 반복을 없애줍니다." | 7초 안에 5장 카드 모두 한 번씩 화면에 잡힐 것 |
-| **0:12–0:22** | `/workflows/weekly-report-demo` detail + Run | "Run" 클릭 → SSE 스트리밍 → 결과 화면 | "주간 보고. 3단계로 초안 생성·정제·Slack 포맷까지 9초." | **편집: 9초 실행을 10초 안에 — 스트리밍 중간 1–2초 컷, 결과 화면 1초 hold** |
+| **0:12–0:22** | `/workflows/weekly-report` detail + Run | "Run" 클릭 → SSE 스트리밍 → 결과 화면 | "주간 보고. 3단계로 초안 생성·정제·Slack 포맷까지 9초." | **편집: 9초 실행을 10초 안에 — 스트리밍 중간 1–2초 컷, 결과 화면 1초 hold** |
 | **0:22–0:30** | `/workflows/meeting-actions` detail + Run | listing으로 백 → 두 번째 카드 클릭 → Run | "회의록에서 액션 아이템과 담당자, 마감일 자동 추출." | 10초 실행 → 8초로 압축 (스트리밍 중간 컷) |
 | **0:30–0:38** | `/workflows/sales-summary` detail + Run | listing → 세 번째 카드 → Run | "월간 매출 CSV가 경영진 보고용 3문장 1-pager로." | 15초 실행 → 8초 (시작 1초 + 결과 표 5초 + transition 2초) |
 | **0:38–0:46** | `/workflows/inquiry-triage` detail + Run | listing → 네 번째 카드 → Run | "고객 문의 6건이 카테고리·긴급도로 분류되고 카테고리별 답변 초안까지." | 24초 실행 → 8초로 가장 큰 컷. 시작 0.5초 + 분류 결과 표 5초 + 답변 초안 1줄 2.5초 |
