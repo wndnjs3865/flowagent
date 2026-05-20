@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { generateRunId, runWorkflow, type StepRunners } from "../runner";
-import { getById, getLatest } from "../results";
+import { getById, getLatest, type Result } from "../results";
 import { DASHBOARD_SLUGS } from "../views/dashboard";
 import {
   DEFAULT_TTL_MS,
@@ -70,7 +70,7 @@ export function createWorkflowRoutes(deps: WorkflowRoutesDeps): Hono {
   // from `runsDir` and renders a preview card per slot. Empty state shows
   // a "지금 실행 →" link to the workflow detail page.
   app.get("/executive", (c) => {
-    const runsBySlug: Record<string, ReturnType<typeof getLatest>> = {};
+    const runsBySlug: Record<string, Result | null> = {};
     for (const slug of DASHBOARD_SLUGS) {
       runsBySlug[slug] = getLatest(deps.runsDir, slug);
     }
