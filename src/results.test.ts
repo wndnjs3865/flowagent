@@ -1,11 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getLatest } from "./results";
 
 function makeTempDir(): string {
   return mkdtempSync(join(tmpdir(), "flowagent-results-"));
+}
+
+function writeJsonl(dir: string, file: string, events: object[]): void {
+  writeFileSync(join(dir, file), events.map((e) => JSON.stringify(e)).join("\n") + "\n");
 }
 
 describe("getLatest", () => {
@@ -21,6 +25,55 @@ describe("getLatest", () => {
 
   it("returns null when runsDir does not exist", () => {
     rmSync(dir, { recursive: true, force: true });
+    expect(getLatest(dir, "sales-summary")).toBeNull();
+  });
+
+  it("returns the latest completed run for the given workflow", () => {
+    writeJsonl(dir, "older.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-2026-05-19T08-00-00-000Z-a",
+        startedAt: "2026-05-19T08:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "OLD" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "sales-summary-2026-05-19T08-00-00-000Z-a" },
+    ]);
+    writeJsonl(dir, "newer.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "sales-summary",
+        runId: "sales-summary-2026-05-20T08-00-00-000Z-b",
+        startedAt: "2026-05-20T08:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "NEW" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "sales-summary-2026-05-20T08-00-00-000Z-b" },
+    ]);
+
+    const result = getLatest(dir, "sales-summary");
+    expect(result).toEqual({
+      workflowName: "sales-summary",
+      runId: "sales-summary-2026-05-20T08-00-00-000Z-b",
+      startedAt: "2026-05-20T08:00:00.000Z",
+      lastOutput: "NEW",
+    });
+  });
+
+  it("ignores runs from other workflows", () => {
+    writeJsonl(dir, "other.jsonl", [
+      {
+        kind: "run-start",
+        workflowName: "weekly-report",
+        runId: "weekly-report-2026-05-20T09-00-00-000Z-c",
+        startedAt: "2026-05-20T09:00:00.000Z",
+      },
+      { kind: "step-output", index: 0, output: "OTHER" },
+      { kind: "step-end", index: 0, ok: true },
+      { kind: "done", runId: "weekly-report-2026-05-20T09-00-00-000Z-c" },
+    ]);
+
     expect(getLatest(dir, "sales-summary")).toBeNull();
   });
 });
