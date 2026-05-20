@@ -8,7 +8,7 @@ interface Props {
 
 const {
   variant = 'inline',
-  buttonText = 'Pro 베타 알림 받기',
+  buttonText = '알림 받을게요',
   placeholder = 'you@example.com',
   source = 'landing',
 } = Astro.props;
@@ -44,11 +44,11 @@ const LOOPS_ENDPOINT = LOOPS_FORM_ID
       autocomplete="email"
       required
       placeholder={placeholder}
-      class="flex-1 rounded-md border border-zinc-300 bg-white px-3.5 py-2.5 text-sm shadow-sm placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder:text-zinc-500"
+      class="flex-1 rounded-md border border-zinc-300 bg-white px-3.5 py-3 text-base shadow-sm placeholder:text-zinc-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-zinc-700 dark:bg-zinc-900 dark:placeholder:text-zinc-500"
     />
     <button
       type="submit"
-      class="inline-flex shrink-0 items-center justify-center rounded-md bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+      class="inline-flex shrink-0 items-center justify-center rounded-md bg-brand-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {buttonText}
     </button>
@@ -94,7 +94,7 @@ const LOOPS_ENDPOINT = LOOPS_FORM_ID
       const showSuccess = () => {
         input.value = '';
         result.textContent =
-          '신청 접수 완료. Pro 베타 오픈 시 메일로 알려드릴게요.';
+          '신청 접수 완료. 새 소식이 있으면 메일로 알려드릴게요.';
         result.className =
           'mt-2 text-sm text-emerald-600 dark:text-emerald-400';
       };

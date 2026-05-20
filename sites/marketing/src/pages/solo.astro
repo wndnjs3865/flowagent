@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailForm from '../components/EmailForm.astro';
+---
+
+<BaseLayout
+  title="1인 자영업 · 프리랜서 — FlowAgent"
+  description="견적 메일·영업 후처리·SNS 답글 3종 신규 워크플로 출시 예정. 가장 먼저 알려드릴게요."
+>
+  <section class="border-b border-zinc-200 dark:border-zinc-800">
+    <div class="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-20">
+      <div
+        class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+      >
+        <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+        준비 중 · 4~6주 뒤 출시
+      </div>
+      <h1
+        class="mt-5 text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50"
+      >
+        견적·응대·SNS,<br />
+        <span class="text-brand-600 dark:text-brand-400">매일 반복되는 일감을 줄이고</span>
+      </h1>
+      <p class="mt-5 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
+        1인 디자이너·강사·컨설턴트·소상공인에게. 영업·견적·고객 응대까지 모두 본인이 처리하는 분께. 3종 신규 워크플로가 매일 반복을 30초로.
+      </p>
+      <div class="mt-8 flex justify-start">
+        <EmailForm
+          variant="inline"
+          source="solo-waitlist"
+          buttonText="출시 알림 받을게요"
+          placeholder="이메일을 알려주세요"
+        />
+      </div>
+      <p class="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
+        스팸 없음 · 출시 1회만 알림 · 메일 주소만 사용
+      </p>
+    </div>
+  </section>
+
+  <section class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <h2 class="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-100">
+        준비 중인 3종 워크플로
+      </h2>
+      <div class="mt-10 grid gap-5 md:grid-cols-3">
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">견적 메일 작성</h3>
+          <ul class="mt-3 space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+            <li>• 요청 사항 → 견적 + 톤 조정</li>
+            <li>• 한국 비즈니스 톤 표준</li>
+            <li>• 이메일 그대로 복사</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">영업 후처리</h3>
+          <ul class="mt-3 space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+            <li>• 미팅 노트 → 다음 액션 분류</li>
+            <li>• Follow-up 메일 초안</li>
+            <li>• CRM 입력 형식</li>
+          </ul>
+        </div>
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">SNS 답글 작성</h3>
+          <ul class="mt-3 space-y-1.5 text-sm text-zinc-600 dark:text-zinc-400">
+            <li>• 본인 톤 학습 + 답글 생성</li>
+            <li>• 인스타·페북·블로그 댓글</li>
+            <li>• 1초 답글 모드</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

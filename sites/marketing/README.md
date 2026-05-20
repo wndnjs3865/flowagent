@@ -38,7 +38,7 @@ pnpm dev
 
 ## 핵심 메시지
 
-> Your workflows are plain YAML files. Your data stays on your machine.
+> 회사 데이터는 노트북 안에만. 한국어 사무 자동화, 5종 워크플로 바로 시작.
 
 전 페이지에서 일관되게 강조. 한국어 카피와 영문 헤드라인 병행.
 
