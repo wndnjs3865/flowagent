@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const lastUpdated = '2026-05-21';
+---
+
+<BaseLayout
+  title="보안 정책 — FlowAgent"
+  description="FlowAgent의 데이터 흐름과 보안 설계. 회사 데이터·API 키·실행 결과 모두 사용자 노트북 안에서만 움직입니다."
+>
+  <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20">
+    <h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-100">
+      보안 정책
+    </h1>
+    <p class="mt-3 text-sm text-zinc-500 dark:text-zinc-500">
+      최종 수정일: {lastUpdated}
+    </p>
+
+    <div class="mt-10 space-y-8 text-zinc-700 dark:text-zinc-300">
+      <section>
+        <p class="leading-relaxed">
+          FlowAgent를 만든 첫 이유는 "회사 데이터가 노트북 밖으로 안 나가는 사무
+          자동화"였습니다. 이 페이지는 그 약속이 구체적으로 어떻게 지켜지는지
+          기술적으로 설명합니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          데이터가 어디로 가는가
+        </h2>
+        <ul class="mt-3 list-disc space-y-2 pl-5 leading-relaxed">
+          <li>
+            <strong>워크플로 입력·출력</strong>: 사용자 노트북의 디스크에만 저장.
+            FlowAgent 서버로 전송되지 않으며, FlowAgent는 외부 수신 서버 자체가
+            없습니다.
+          </li>
+          <li>
+            <strong>LLM 호출</strong>: 사용자가 입력한 Anthropic API 키로 직접
+            호출됩니다. FlowAgent를 거치지 않습니다. 즉 입력 텍스트는 사용자의
+            노트북 → Anthropic 서버로 직접 갑니다.
+          </li>
+          <li>
+            <strong>API 키</strong>: 사용자 노트북의 환경변수 또는 로컬 설정 파일에만
+            저장. FlowAgent의 어떤 코드도 키를 외부로 전송하지 않습니다.
+          </li>
+          <li>
+            <strong>실행 결과 (runs/*.jsonl)</strong>: 사용자 작업 디렉토리에만
+            기록됩니다. signed URL로 공유한 경우에만 사용자가 명시한 한 건이
+            URL fragment를 통해 모바일 브라우저에서 접근 가능합니다.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          셸 실행 sandboxing
+        </h2>
+        <p class="mt-3 leading-relaxed">
+          워크플로의 <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">shell</code>
+          step은 YAML에 명시된 명령만 실행합니다. LLM이 동적으로 명령을 생성하지
+          않으며, 사용자가 보지 못한 명령이 백그라운드에서 도는 일은 구조적으로
+          불가능합니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          오픈소스 검증
+        </h2>
+        <p class="mt-3 leading-relaxed">
+          FlowAgent는 Apache 2.0 라이선스 오픈소스입니다. 위 약속을 직접 확인하려면
+          <a href="https://github.com/wndnjs3865/flowagent" target="_blank" rel="noopener" class="underline">GitHub 저장소</a>에서
+          소스코드를 검토하실 수 있습니다. 보안 우려·취약점은 아래 문의처로
+          제보 부탁드립니다.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          웹사이트(taskflow.kr) 수집 정보
+        </h2>
+        <p class="mt-3 leading-relaxed">
+          본 웹사이트는 새 소식 알림 신청 시 이메일 주소만 수집합니다. 자세한
+          처리 방식은
+          <a href="/privacy" class="underline">개인정보 처리방침</a>을
+          참고하세요.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          취약점 제보
+        </h2>
+        <p class="mt-3 leading-relaxed">
+          보안 취약점을 발견하셨다면 공개 issue 대신
+          <a href="mailto:wndnjs3865@naver.com" class="underline">wndnjs3865@naver.com</a>
+          으로 알려주세요. 7영업일 이내에 회신드립니다.
+        </p>
+      </section>
+    </div>
+  </article>
+</BaseLayout>
