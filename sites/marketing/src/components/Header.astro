@@ -48,7 +48,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
           <a
             href={item.href}
             class:list={[
-              'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
               currentPath === item.href
                 ? 'text-zinc-900 dark:text-zinc-100'
                 : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
@@ -130,7 +130,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
         navItems.map((item) => (
           <a
             href={item.href}
-            class="block rounded-md px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            class="block rounded-md px-3 py-3 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
           >
             {item.label}
           </a>
