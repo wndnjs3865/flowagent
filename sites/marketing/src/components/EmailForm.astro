@@ -14,11 +14,12 @@ const {
 } = Astro.props;
 
 // Loops form ID is read from PUBLIC_LOOPS_FORM_ID env var.
-// To enable real submission: set this in Vercel Project Settings →
+// To enable submission: set this in Vercel Project Settings →
 // Environment Variables (Production + Preview + Development).
 //   Key:   PUBLIC_LOOPS_FORM_ID
-//   Value: <your Loops newsletter form ID> (e.g. abc12345-...)
-// Until set, the form simulates success client-side (Phase 0 default).
+//   Value: <Loops newsletter form ID> (e.g. cmp2ei3ut1xbj0i02rct8hrht)
+// If unset, the form shows an error on submit. The form's source prop
+// is sent to Loops as `userGroup` for per-channel lead attribution.
 const LOOPS_FORM_ID = import.meta.env.PUBLIC_LOOPS_FORM_ID ?? '';
 const LOOPS_ENDPOINT = LOOPS_FORM_ID
   ? `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`
@@ -105,18 +106,22 @@ const LOOPS_ENDPOINT = LOOPS_FORM_ID
       };
 
       try {
-        // Phase 0: if endpoint is empty (PUBLIC_LOOPS_FORM_ID unset),
-        // simulate success client-side so UX flow remains testable.
         if (!endpoint) {
-          await new Promise((r) => setTimeout(r, 400));
-          showSuccess();
-          return;
+          // Production should have PUBLIC_LOOPS_FORM_ID set in Vercel env.
+          // If missing, fail loudly rather than show fake success — this
+          // prevents the silent waitlist=0 bug that masked the env-not-set
+          // state during 2026-05-20 smoke test.
+          throw new Error('Email form is not configured.');
         }
 
         // Loops newsletter-form endpoint expects URL-encoded body
         // (multipart/form-data returns 400 "Please enter an email address.").
+        // userGroup carries the channel source (e.g. "solo-updates",
+        // "landing-hero") so leads can be attributed per channel without
+        // setting up custom Loops properties.
         const body = new URLSearchParams();
         body.append('email', input.value);
+        body.append('userGroup', form.dataset.source || 'unknown');
 
         const res = await fetch(endpoint, {
           method: 'POST',
