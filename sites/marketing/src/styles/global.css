@@ -37,8 +37,10 @@ html {
 
 body {
   font-family: var(--font-sans);
+  font-feature-settings: "tnum" on;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  line-height: 1.6;
 }
 
 :focus-visible {
@@ -54,4 +56,15 @@ body {
 .dark ::selection {
   background-color: var(--color-brand-800);
   color: var(--color-brand-50);
+}
+
+/* Korean readability: slightly looser tracking on large headings */
+h1 {
+  letter-spacing: -0.025em;
+}
+
+/* Tabular numerals for price/stats areas */
+.tabular-nums,
+[class*="font-mono"] {
+  font-variant-numeric: tabular-nums;
 }
